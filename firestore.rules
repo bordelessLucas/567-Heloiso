@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function callerRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && callerRole() == 'admin';
+    }
+
+    function isAdminOrReadonly() {
+      return isSignedIn() && callerRole() in ['admin', 'admin_readonly'];
+    }
+
+    function isValidInvestorCreate() {
+      return request.resource.data.keys().hasAll([
+          'email', 'displayName', 'role', 'createdAt', 'updatedAt'
+        ])
+        && request.resource.data.role == 'investor'
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.displayName is string
+        && request.resource.data.email is string;
+    }
+
+    match /users/{userId} {
+      allow read: if isSelf(userId) || isAdminOrReadonly();
+
+      allow create: if isSelf(userId) && isValidInvestorCreate();
+
+      allow update: if (isSelf(userId)
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+        || isAdmin();
+
+      allow delete: if isAdmin();
+
+      match /sensitive/{docId} {
+        allow read: if isSelf(userId) || isAdminOrReadonly();
+        allow write: if isSelf(userId) || isAdmin();
+      }
+    }
+
+    match /funds/{fundId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /portfolios/{userId}/{document=**} {
+      allow read: if isSelf(userId) || isAdminOrReadonly();
+      allow write: if isSelf(userId);
+    }
+  }
+}
