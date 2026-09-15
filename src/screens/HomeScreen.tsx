@@ -1,66 +1,185 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { router, type Href } from 'expo-router';
 
 import { Container, Typography } from '@/src/components';
+import { AllocationRing } from '@/src/components/AllocationRing';
+import { HomeStreakCard } from '@/src/components/HomeStreakCard';
+import { ModuleIcon } from '@/src/components/ModuleIcon';
+import {
+  ModulePreviewCard,
+  type ModulePreviewData,
+} from '@/src/components/ModulePreviewCard';
+import { DEMO_RECOMMENDATIONS, isDemoAccount } from '@/src/data/mocks/demo.account';
+import { useAuth } from '@/src/hooks/useAuth';
+import { usePlanner } from '@/src/hooks/usePlanner';
+import { usePortfolio } from '@/src/hooks/usePortfolio';
+import { useFundsCatalog } from '@/src/hooks/useFundsCatalog';
 import { colors, radii, spacing } from '@/src/theme/tokens';
-
-const MODULES = [
-  { id: 'funds', title: 'Fundos', description: 'Buscar e analisar FIIs' },
-  { id: 'portfolio', title: 'Carteira', description: 'Acompanhar sua posição' },
-  { id: 'learn', title: 'Aprender', description: 'Educação do zero ao avançado' },
-  { id: 'planner', title: 'Planner', description: 'Desafios de poupança' },
-] as const;
+import { formatBrl, formatPercent } from '@/src/utils/format';
 
 export function HomeScreen() {
-  const handleOpenModule = (_moduleId: string) => {};
-  const handleOpenProfile = () => {};
+  const { profile, user } = useAuth();
+  const { challenge, loading: plannerLoading } = usePlanner();
+  const { dashboard, loading: portfolioLoading } = usePortfolio();
+  const { popular, boards, loading: fundsLoading } = useFundsCatalog();
+
+  const displayName =
+    profile?.displayName?.trim() ||
+    user?.displayName?.trim() ||
+    'investidor';
+  const email = profile?.email ?? user?.email;
+  const demo = isDemoAccount(email);
+
+  const topFund = popular[0];
+  const topDy = boards[0]?.entries[0];
+
+  const previews = useMemo<ModulePreviewData[]>(() => {
+    const portfolioHeadline = dashboard?.summary.holdingsCount
+      ? `${formatBrl(dashboard.totalMarketValue)} · ${dashboard.summary.holdingsCount} ativos`
+      : 'Monte sua primeira posição';
+
+    const portfolioDetail = dashboard
+      ? `Resultado: ${formatPercent(dashboard.totalPnlPercent)} no snapshot`
+      : 'Sem posições ainda — comece com calma';
+
+    // Carteira em destaque logo após o Planner (2º módulo da Home).
+    return [
+      {
+        id: 'portfolio',
+        title: 'Carteira',
+        href: '/(tabs)/portfolio',
+        icon: 'portfolio' as const,
+        eyebrow: 'Sua posição',
+        headline: portfolioHeadline,
+        detail: portfolioDetail,
+        accent: 'primary' as const,
+      },
+      {
+        id: 'funds',
+        title: 'Fundos',
+        href: '/(tabs)/funds',
+        icon: 'funds' as const,
+        eyebrow: 'Explorar FIIs',
+        headline: topFund
+          ? `${topFund.ticker} · ${formatBrl(topFund.sharePrice)}`
+          : 'Busca e indicadores',
+        detail: topFund
+          ? `DY ${formatPercent(topFund.dividendYield)} · toque para analisar`
+          : 'Listagens claras, sem jargão desnecessário',
+        accent: 'soft' as const,
+      },
+      {
+        id: 'learn',
+        title: 'Aprender',
+        href: '/(tabs)/learn',
+        icon: 'learn' as const,
+        eyebrow: 'Do zero ao avançado',
+        headline: 'O que é um FII?',
+        detail: 'Trilhas curtas para mexer sem medo',
+        accent: 'soft' as const,
+      },
+      {
+        id: 'rankings',
+        title: 'Rankings',
+        href: '/rankings',
+        icon: 'rankings' as const,
+        eyebrow: 'Descoberta rápida',
+        headline: topDy ? `#1 DY · ${topDy.ticker}` : 'Maiores indicadores',
+        detail: topDy
+          ? `${topDy.formattedValue} no snapshot atual`
+          : 'Compare fundos por DY, liquidez e PL',
+        accent: 'soft' as const,
+      },
+    ];
+  }, [dashboard, topFund, topDy]);
+
+  const loading = plannerLoading || portfolioLoading || fundsLoading;
 
   return (
     <Container scroll contentStyle={styles.content}>
       <View style={styles.navbar}>
-        <View>
+        <View style={styles.navText}>
           <Typography variant="caption" color={colors.textMuted}>
             Mercado FiiS
           </Typography>
-          <Typography variant="h2">Olá, investidor</Typography>
+          <Typography variant="h2">Olá, {displayName}</Typography>
+          {demo ? (
+            <Typography variant="caption" color={colors.primaryDark}>
+              Conta demo com dados para teste
+            </Typography>
+          ) : null}
         </View>
-        <Pressable onPress={handleOpenProfile} style={styles.avatar}>
-          <Typography variant="label" color={colors.black}>
-            Perfil
-          </Typography>
+        <Pressable
+          onPress={() => router.push('/(tabs)/profile' as Href)}
+          style={styles.avatar}
+        >
+          <ModuleIcon name="profile" size={16} tone="yellow" />
         </Pressable>
       </View>
 
       <View style={styles.hero}>
-        <Typography variant="h1">Organize, entenda e acompanhe FIIs</Typography>
+        <Typography variant="h1">Finanças claras. Decisão sua.</Typography>
         <Typography variant="body" color={colors.textMuted}>
-          Informações claras para você decidir com mais segurança — sem recomendações de
-          compra ou venda.
+          Comece pelo Planner ou explore os módulos abaixo — tudo em linguagem simples.
         </Typography>
       </View>
 
+      {loading ? (
+        <ActivityIndicator color={colors.primary} />
+      ) : (
+        <HomeStreakCard challenge={challenge} />
+      )}
+
+      {!loading && dashboard && dashboard.summary.holdingsCount > 0 ? (
+        <AllocationRing
+          positions={dashboard.positions}
+          variant="hero"
+          title="Sua carteira agora"
+          onPress={() => router.push('/(tabs)/portfolio' as Href)}
+        />
+      ) : null}
+
       <View style={styles.section}>
-        <Typography variant="h3">Módulos</Typography>
+        <Typography variant="h3">Explorar</Typography>
         <View style={styles.grid}>
-          {MODULES.map((module) => (
-            <Pressable
-              key={module.id}
-              onPress={() => handleOpenModule(module.id)}
-              style={styles.card}
-            >
-              <Typography variant="bodyStrong">{module.title}</Typography>
-              <Typography variant="caption" color={colors.textMuted}>
-                {module.description}
-              </Typography>
-            </Pressable>
+          {previews.map((module) => (
+            <ModulePreviewCard key={module.id} module={module} />
           ))}
         </View>
       </View>
 
-      <View style={styles.skeletonBlock}>
-        <Typography variant="h3">Destaques</Typography>
-        <View style={styles.skeletonRow} />
-        <View style={[styles.skeletonRow, styles.skeletonShort]} />
-        <View style={styles.skeletonRow} />
+      <View style={styles.section}>
+        <View style={styles.sectionHead}>
+          <ModuleIcon name="funds" size={18} tone="light" />
+          <Typography variant="h3">Para estudar agora</Typography>
+        </View>
+        <Typography variant="caption" color={colors.textMuted}>
+          Sugestões educacionais — não são ordens de compra ou venda.
+        </Typography>
+        <View style={styles.recs}>
+          {DEMO_RECOMMENDATIONS.map((item) => (
+            <Pressable
+              key={item.ticker}
+              style={styles.recCard}
+              onPress={() => router.push(`/fund/${item.ticker}` as Href)}
+            >
+              <View style={styles.recHead}>
+                <View style={styles.recTitle}>
+                  <ModuleIcon name="rankings" size={16} tone="yellow" />
+                  <Typography variant="bodyStrong">{item.ticker}</Typography>
+                </View>
+                <Typography variant="caption" color={colors.primaryDark}>
+                  {item.highlight}
+                </Typography>
+              </View>
+              <Typography variant="caption" color={colors.textMuted}>
+                {item.name}
+              </Typography>
+              <Typography variant="body">{item.reason}</Typography>
+            </Pressable>
+          ))}
+        </View>
       </View>
     </Container>
   );
@@ -73,13 +192,15 @@ const styles = StyleSheet.create({
   },
   navbar: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  navText: {
+    flex: 1,
+    gap: 2,
   },
   avatar: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
     borderRadius: radii.full,
   },
   hero: {
@@ -88,27 +209,32 @@ const styles = StyleSheet.create({
   section: {
     gap: spacing.md,
   },
+  sectionHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   grid: {
     gap: spacing.md,
   },
-  card: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
+  recs: {
+    gap: spacing.sm,
+  },
+  recCard: {
+    backgroundColor: colors.surfaceElevated,
     borderRadius: radii.md,
     padding: spacing.md,
     gap: spacing.xs,
   },
-  skeletonBlock: {
-    gap: spacing.md,
+  recHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
-  skeletonRow: {
-    height: 14,
-    borderRadius: radii.sm,
-    backgroundColor: colors.border,
-    width: '100%',
-  },
-  skeletonShort: {
-    width: '62%',
+  recTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
 });

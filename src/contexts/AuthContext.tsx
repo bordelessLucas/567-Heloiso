@@ -60,6 +60,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         .then((nextProfile) => {
           setProfile(nextProfile);
         })
+        .catch(() => {
+          setProfile(null);
+        })
         .finally(() => {
           setIsLoading(false);
         });
@@ -74,13 +77,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signUp = useCallback(
     async (name: string, email: string, password: string) => {
-      const credential = await signUpWithEmail(email, password);
+      const normalizedEmail = email.trim().toLowerCase();
+      const credential = await signUpWithEmail(normalizedEmail, password);
       await updateAuthDisplayName(name);
-      await createUserProfile({
+      const created = await createUserProfile({
         id: credential.user.uid,
-        email,
+        email: credential.user.email ?? normalizedEmail,
         displayName: name,
       });
+      setProfile(created);
     },
     [],
   );
@@ -91,7 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {
-    await sendPasswordReset(email);
+    await sendPasswordReset(email.trim().toLowerCase());
   }, []);
 
   const value = useMemo<AuthContextValue>(

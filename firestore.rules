@@ -27,7 +27,7 @@ service cloud.firestore {
           'email', 'displayName', 'role', 'createdAt', 'updatedAt'
         ])
         && request.resource.data.role == 'investor'
-        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.email.lower() == request.auth.token.email.lower()
         && request.resource.data.displayName is string
         && request.resource.data.email is string;
     }

@@ -10,7 +10,7 @@ import {
 
 import { colors, radii, spacing, typography } from '@/src/theme/tokens';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline';
+export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger';
 
 export interface ButtonProps extends Omit<PressableProps, 'children'> {
   label: string;
@@ -47,7 +47,9 @@ export function Button({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'outline' ? colors.black : colors.black}
+          color={
+            variant === 'secondary' || variant === 'danger' ? colors.surface : colors.black
+          }
         />
       ) : (
         <Text style={[styles.label, variantStyles[variant].label]}>{label}</Text>
@@ -68,6 +70,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   label: {
+    fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.body,
     fontWeight: '600',
   },
@@ -110,6 +113,17 @@ const variantStyles = {
     },
     label: {
       color: colors.black,
+    },
+  }),
+  danger: StyleSheet.create({
+    container: {
+      backgroundColor: colors.danger,
+    },
+    pressed: {
+      backgroundColor: '#8F1B14',
+    },
+    label: {
+      color: colors.surfaceElevated,
     },
   }),
 };

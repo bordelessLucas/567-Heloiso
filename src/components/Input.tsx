@@ -50,7 +50,7 @@ export function Input({
           editable={editable}
           placeholderTextColor={colors.textMuted}
           secureTextEntry={secure}
-          style={styles.input}
+          style={[styles.input, rest.multiline ? styles.inputMultiline : null]}
         />
 
         {isPassword ? (
@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   label: {
+    fontFamily: typography.fontFamily.medium,
     fontSize: typography.fontSize.md,
     fontWeight: '500',
     color: colors.text,
@@ -83,10 +84,10 @@ const styles = StyleSheet.create({
   },
   field: {
     minHeight: 52,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
     borderRadius: radii.md,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceElevated,
     paddingHorizontal: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
@@ -104,16 +105,23 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    fontFamily: typography.fontFamily.regular,
     fontSize: typography.fontSize.body,
     color: colors.text,
     paddingVertical: spacing.sm,
   },
+  inputMultiline: {
+    minHeight: 72,
+    textAlignVertical: 'top',
+  },
   toggle: {
+    fontFamily: typography.fontFamily.semiBold,
     fontSize: typography.fontSize.sm,
     fontWeight: '600',
     color: colors.black,
   },
   error: {
+    fontFamily: typography.fontFamily.regular,
     fontSize: typography.fontSize.sm,
     color: colors.danger,
   },

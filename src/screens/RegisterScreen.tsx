@@ -1,20 +1,52 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 
 import { Button, Container, Input, Typography } from '@/src/components';
+import { useAuth } from '@/src/hooks/useAuth';
 import { colors, spacing } from '@/src/theme/tokens';
+import { getAuthErrorMessage } from '@/src/utils/authErrors';
 
 export function RegisterScreen() {
+  const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<string | undefined>();
+  const [loading, setLoading] = useState(false);
 
-  const handleRegister = () => {};
+  async function handleRegister() {
+    setError(undefined);
+
+    if (!name.trim() || !email.trim() || !password || !confirmPassword) {
+      setError('Preencha todos os campos.');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('As senhas não coincidem.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signUp(name, email, password);
+      router.replace('/(tabs)');
+    } catch (err) {
+      setError(getAuthErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <Container keyboardAware scroll contentStyle={styles.content}>
+    <Container keyboardAware scroll contentStyle={styles.content} safeBottom>
       <View style={styles.header}>
         <Typography variant="h1">Criar conta</Typography>
         <Typography variant="body" color={colors.textMuted}>
@@ -55,12 +87,17 @@ export function RegisterScreen() {
           placeholder="Repita a senha"
           value={confirmPassword}
           onChangeText={setConfirmPassword}
+          error={error}
         />
 
-        <Button label="Criar conta" onPress={handleRegister} />
+        <Button
+          label="Criar conta"
+          loading={loading}
+          onPress={() => void handleRegister()}
+        />
 
         <Link href="/(auth)/login" asChild>
-          <Button label="Já tenho conta" variant="outline" />
+          <Button label="Já tenho conta" variant="outline" disabled={loading} />
         </Link>
       </View>
     </Container>

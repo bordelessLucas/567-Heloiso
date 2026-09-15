@@ -17,14 +17,14 @@ export async function signInWithEmail(
   email: string,
   password: string,
 ): Promise<UserCredential> {
-  return signInWithEmailAndPassword(auth, email.trim(), password);
+  return signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
 }
 
 export async function signUpWithEmail(
   email: string,
   password: string,
 ): Promise<UserCredential> {
-  return createUserWithEmailAndPassword(auth, email.trim(), password);
+  return createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
 }
 
 export async function updateAuthDisplayName(displayName: string): Promise<void> {
@@ -42,7 +42,7 @@ export async function signOutCurrentUser(): Promise<void> {
 }
 
 export async function sendPasswordReset(email: string): Promise<void> {
-  await sendPasswordResetEmail(auth, email.trim());
+  await sendPasswordResetEmail(auth, email.trim().toLowerCase());
 }
 
 export function subscribeToAuthState(

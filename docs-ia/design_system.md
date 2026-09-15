@@ -10,10 +10,11 @@
 
 - Sofisticada, simples, elegante, moderna, financeira e profissional
 - Excelente hierarquia tipográfica
-- Cards limpos (apenas quando há interação ou agrupamento necessário)
-- Gráficos legíveis; números financeiros em destaque
+- Cards limpos **sem borda pesada** — hierarquia por fundo (elevated / warm / muted)
+- Gráficos legíveis; números financeiros com destaque
 - Navegação simples; evitar excesso de informação por tela
 - Identidade **não infantil** (planner/gamificação inclusive)
+- Home: **um** destaque de Planner (streak); demais módulos em previews com ícone
 
 Referência de organização: apps financeiros modernos — **sem copiar** layouts ou marcas de terceiros.
 
@@ -24,11 +25,13 @@ Referência de organização: apps financeiros modernos — **sem copiar** layou
 | `primary` | `#F0B429` | Amarelo da marca — CTAs, destaques, marca |
 | `primaryDark` | `#C49214` | Pressed / ênfase do amarelo |
 | `black` | `#0D0D0D` | Texto forte, headers, contraste |
-| `background` | `#F7F7F5` | Fundo de tela |
-| `surface` | `#FFFFFF` | Superfícies e campos |
+| `background` | `#EFEDE8` | Fundo de tela (quente e suave) |
+| `surface` / `surfaceElevated` | `#FBFBF9` / `#FFFFFF` | Superfícies e cards |
+| `surfaceWarm` | `#F7F1E3` | Destaques suaves (planner, alertas leves) |
+| `surfaceMuted` | `#F5F3EE` | Headers internos |
 | `text` | `#0D0D0D` | Texto principal |
 | `textMuted` | `#6B7280` | Texto auxiliar, captions |
-| `border` | `#E5E5E0` | Bordas e divisores |
+| `border` / `borderSubtle` | `#E8E6E0` / `#F0EEE9` | Divisores finos; preferir cards sem borda forte |
 | `danger` | `#B42318` | Erros e alertas |
 | `success` | `#067647` | Sucesso / positivo |
 | `warning` | `#B54708` | Atenção (leitura guiada) |
@@ -39,6 +42,9 @@ Referência de organização: apps financeiros modernos — **sem copiar** layou
 **Light mode first** (fundo claro, amarelo + preto). Dark mode não é prioridade do MVP.
 
 ## Tipografia
+
+Família: **Inter** (estilo tipográfico do ecossistema OpenAI / produtos AI modernos).
+A fonte proprietária *OpenAI Sans* não é distribuída para apps — Inter é a alternativa aberta equivalente.
 
 | Estilo | Tamanho | Peso | Uso |
 | --- | --- | --- | --- |
@@ -51,7 +57,9 @@ Referência de organização: apps financeiros modernos — **sem copiar** layou
 | `caption` | 13 | 400 | Auxiliar / labels |
 | `label` | 14 | 500 | Labels de formulário |
 
-Família: sistema nativo no MVP (`System` / San Francisco / Roboto). Substituir por fonte de marca quando disponível.
+## Elevação
+
+Cards de módulo usam sombra discreta (`shadows.card`) — sem borda pesada.
 
 ## Espaçamento (base 4)
 

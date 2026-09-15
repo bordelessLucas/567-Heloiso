@@ -1,19 +1,59 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { Link } from 'expo-router';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Link, router } from 'expo-router';
 
 import { Button, Container, Input, Typography } from '@/src/components';
+import { useAuth } from '@/src/hooks/useAuth';
 import { colors, spacing } from '@/src/theme/tokens';
+import { getAuthErrorMessage } from '@/src/utils/authErrors';
 
 export function LoginScreen() {
+  const { signIn, resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | undefined>();
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {};
-  const handleForgotPassword = () => {};
+  async function handleLogin() {
+    setError(undefined);
+
+    if (!email.trim() || !password) {
+      setError('Preencha e-mail e senha.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signIn(email, password);
+      router.replace('/(tabs)');
+    } catch (err) {
+      setError(getAuthErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    setError(undefined);
+
+    if (!email.trim()) {
+      setError('Informe seu e-mail para recuperar a senha.');
+      return;
+    }
+
+    try {
+      await resetPassword(email);
+      Alert.alert(
+        'E-mail enviado',
+        'Se existir uma conta com este e-mail, você receberá o link de recuperação.',
+      );
+    } catch (err) {
+      setError(getAuthErrorMessage(err));
+    }
+  }
 
   return (
-    <Container keyboardAware scroll contentStyle={styles.content}>
+    <Container keyboardAware scroll contentStyle={styles.content} safeBottom>
       <View style={styles.brandBlock}>
         <Typography variant="display" color={colors.black}>
           Mercado FiiS
@@ -32,6 +72,7 @@ export function LoginScreen() {
           placeholder="seu@email.com"
           value={email}
           onChangeText={setEmail}
+          error={error && !password ? error : undefined}
         />
         <Input
           label="Senha"
@@ -40,18 +81,19 @@ export function LoginScreen() {
           placeholder="Sua senha"
           value={password}
           onChangeText={setPassword}
+          error={error}
         />
 
-        <Pressable onPress={handleForgotPassword} style={styles.forgot}>
+        <Pressable onPress={() => void handleForgotPassword()} style={styles.forgot}>
           <Typography variant="label" color={colors.black}>
             Esqueci minha senha
           </Typography>
         </Pressable>
 
-        <Button label="Entrar" onPress={handleLogin} />
+        <Button label="Entrar" loading={loading} onPress={() => void handleLogin()} />
 
         <Link href="/(auth)/register" asChild>
-          <Button label="Criar conta" variant="outline" />
+          <Button label="Criar conta" variant="outline" disabled={loading} />
         </Link>
       </View>
     </Container>

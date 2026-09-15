@@ -1,3 +1,11 @@
 export { LoginScreen } from '@/src/screens/LoginScreen';
 export { RegisterScreen } from '@/src/screens/RegisterScreen';
 export { HomeScreen } from '@/src/screens/HomeScreen';
+export { FundsScreen } from '@/src/screens/FundsScreen';
+export { FundDetailScreen } from '@/src/screens/FundDetailScreen';
+export { PortfolioScreen } from '@/src/screens/PortfolioScreen';
+export { PlannerScreen } from '@/src/screens/PlannerScreen';
+export { LearningScreen } from '@/src/screens/LearningScreen';
+export { RankingsScreen } from '@/src/screens/RankingsScreen';
+export { NewsScreen } from '@/src/screens/NewsScreen';
+export { ProfileScreen } from '@/src/screens/ProfileScreen';
