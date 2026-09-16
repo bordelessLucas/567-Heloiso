@@ -17,7 +17,10 @@ export const colors = {
   borderSubtle: '#F0EEE9',
   surfaceElevated: '#FFFFFF',
   surfaceMuted: '#F5F3EE',
+  /** Cards de atalho / funcionalidade (padrão amarelo suave). */
   surfaceWarm: '#F7F1E3',
+  /** Cards principais da Home (Planner, Carteira) — um tom mais marcado. */
+  surfaceFeature: '#EDE0C4',
   danger: '#B42318',
   success: '#067647',
   warning: '#B54708',

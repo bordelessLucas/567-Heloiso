@@ -1,5 +1,6 @@
 import type { FundProfile, FundSegment, FundSummary } from '@/src/domain/fund';
 import type { RankingBoard, RankingMetric } from '@/src/domain/ranking';
+import { toTesouroComparisonView } from '@/src/domain/fundsTools';
 import { MOCK_FUNDS, toFundSummary } from '@/src/data/mocks/funds.mock';
 import { formatCompactBrl, formatPercent, formatRatio } from '@/src/utils/format';
 
@@ -51,6 +52,7 @@ export async function listRankingBoards(): Promise<RankingBoard[]> {
     { id: 'dy', title: 'Maiores Dividend Yield', metric: 'dividend_yield' },
     { id: 'liq', title: 'Maiores Liquidez', metric: 'liquidity' },
     { id: 'pl', title: 'Maior Patrimônio', metric: 'net_worth' },
+    { id: 'pvp', title: 'Menor P/VP', metric: 'pvp' },
   ];
 
   return boards.map((board) => {
@@ -59,9 +61,12 @@ export async function listRankingBoards(): Promise<RankingBoard[]> {
         if (board.metric === 'dividend_yield') return fund.dividendYield ?? 0;
         if (board.metric === 'liquidity') return fund.liquidity ?? 0;
         if (board.metric === 'net_worth') return fund.netWorth ?? 0;
-        if (board.metric === 'pvp') return fund.pvp ?? 0;
+        if (board.metric === 'pvp') return fund.pvp ?? Number.POSITIVE_INFINITY;
         return fund.popular ? 1 : 0;
       };
+      if (board.metric === 'pvp') {
+        return pick(a) - pick(b);
+      }
       return pick(b) - pick(a);
     });
 
@@ -90,4 +95,37 @@ export async function listRankingBoards(): Promise<RankingBoard[]> {
       }),
     };
   });
+}
+
+export async function listFundsByRankingMetric(
+  metric: RankingMetric,
+  options?: { segment?: FundSegment | 'all'; limit?: number },
+): Promise<FundSummary[]> {
+  const segment = options?.segment ?? 'all';
+  const filtered = await listFunds(undefined, segment);
+
+  const profiles = filtered
+    .map((summary) => MOCK_FUNDS.find((fund) => fund.id === summary.id))
+    .filter((fund): fund is FundProfile => Boolean(fund));
+
+  const sorted = [...profiles].sort((a, b) => {
+    const pick = (fund: FundProfile): number => {
+      if (metric === 'dividend_yield') return fund.dividendYield ?? -1;
+      if (metric === 'liquidity') return fund.liquidity ?? -1;
+      if (metric === 'net_worth') return fund.netWorth ?? -1;
+      if (metric === 'pvp') return fund.pvp ?? Number.POSITIVE_INFINITY;
+      return fund.popular ? 1 : 0;
+    };
+    if (metric === 'pvp') return pick(a) - pick(b);
+    return pick(b) - pick(a);
+  });
+
+  const limit = options?.limit ?? sorted.length;
+  return sorted.slice(0, limit).map(toFundSummary);
+}
+
+export async function getTesouroComparison(ticker: string) {
+  const fund = await getFundByTicker(ticker);
+  if (!fund) return null;
+  return { fund, comparison: toTesouroComparisonView(fund) };
 }

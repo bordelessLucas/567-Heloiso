@@ -55,6 +55,7 @@ export default function RootLayout() {
         <Stack.Screen name="news" />
         <Stack.Screen name="profile" />
         <Stack.Screen name="planner" />
+        <Stack.Screen name="tools/tesouro-ipca" />
         <Stack.Screen name="fund/[ticker]" />
         <Stack.Screen name="holding/[ticker]" />
         <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: true }} />

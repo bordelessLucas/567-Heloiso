@@ -14,10 +14,12 @@
 
 | Tela | Rota |
 | --- | --- |
-| Planner (streak) | `/planner` |
-| Rankings | `/rankings` |
+| Planner (streak) | `/planner` (`?from=funds` contextual) |
+| Rankings | `/rankings` (métrica + segmento) |
+| Comparar Tesouro IPCA+ | `/tools/tesouro-ipca` (`?ticker=`) |
 | Notícias | `/news` |
 | Detalhe do FII | `/fund/[ticker]` |
+| Posição (holding) | `/holding/[ticker]` |
 
 ## Pastas por responsabilidade
 
@@ -45,7 +47,8 @@ app/                # Rotas Expo Router (finas)
 
 1. ~~Fundos → MockProvider + busca~~ ✅
 2. ~~Perfil do FII → indicadores + explicações~~ ✅
-3. Carteira pessoal → CRUD de posições
-4. ~~Planner → desafios 50/100/200 + check-in/streak~~ ✅
-5. Aprender → lições nas trilhas já listadas
-6. Trocar MockProvider por API/B3 (mesmo contrato de services)
+3. ~~Fundos robustez → Tesouro (escolha FII), rankings, pontes Carteira/Planner~~ ✅
+4. Carteira pessoal → CRUD de posições (Firestore)
+5. ~~Planner → desafios 50/100/200 + check-in/streak~~ ✅
+6. Aprender → lições nas trilhas já listadas
+7. Trocar MockProvider por API/B3 (mesmo contrato de services)

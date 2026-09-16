@@ -7,5 +7,6 @@ export { PortfolioScreen } from '@/src/screens/PortfolioScreen';
 export { PlannerScreen } from '@/src/screens/PlannerScreen';
 export { LearningScreen } from '@/src/screens/LearningScreen';
 export { RankingsScreen } from '@/src/screens/RankingsScreen';
+export { TesouroCompareScreen } from '@/src/screens/TesouroCompareScreen';
 export { NewsScreen } from '@/src/screens/NewsScreen';
 export { ProfileScreen } from '@/src/screens/ProfileScreen';

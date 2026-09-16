@@ -53,7 +53,6 @@ export function HomeScreen() {
         eyebrow: 'Sua posição',
         headline: portfolioHeadline,
         detail: portfolioDetail,
-        accent: 'primary' as const,
       },
       {
         id: 'funds',
@@ -67,7 +66,6 @@ export function HomeScreen() {
         detail: topFund
           ? `DY ${formatPercent(topFund.dividendYield)} · toque para analisar`
           : 'Listagens claras, sem jargão desnecessário',
-        accent: 'soft' as const,
       },
       {
         id: 'learn',
@@ -77,7 +75,6 @@ export function HomeScreen() {
         eyebrow: 'Do zero ao avançado',
         headline: 'O que é um FII?',
         detail: 'Trilhas curtas para mexer sem medo',
-        accent: 'soft' as const,
       },
       {
         id: 'rankings',
@@ -89,7 +86,6 @@ export function HomeScreen() {
         detail: topDy
           ? `${topDy.formattedValue} no snapshot atual`
           : 'Compare fundos por DY, liquidez e PL',
-        accent: 'soft' as const,
       },
     ];
   }, [dashboard, topFund, topDy]);
@@ -221,7 +217,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   recCard: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.surfaceWarm,
     borderRadius: radii.md,
     padding: spacing.md,
     gap: spacing.xs,

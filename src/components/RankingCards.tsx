@@ -3,7 +3,7 @@ import { router, type Href } from 'expo-router';
 
 import { Typography } from '@/src/components/Typography';
 import type { RankingBoard } from '@/src/domain/ranking';
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
 
 interface RankingCardsProps {
   boards: RankingBoard[];
@@ -62,12 +62,13 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 280,
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.surfaceWarm,
     borderRadius: radii.lg,
     overflow: 'hidden',
+    ...shadows.card,
   },
   header: {
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: colors.surfaceFeature,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
   },

@@ -94,7 +94,7 @@ export function HomeStreakCard({ challenge }: HomeStreakCardProps) {
 const styles = StyleSheet.create({
   card: {
     gap: spacing.sm,
-    backgroundColor: colors.surfaceWarm,
+    backgroundColor: colors.surfaceFeature,
     borderRadius: radii.lg,
     padding: spacing.md,
     ...shadows.card,

@@ -58,6 +58,14 @@
 - [x] Comparação FII × Tesouro IPCA+
 - [ ] Carteira pessoal (CRUD de posições)
 
+## Sprint 6b — Robustez Fundos (ferramentas)
+
+- [x] Hub Fundos: loading/empty, hierarquia das ferramentas, pontes Carteira/Planner
+- [x] Comparar Tesouro IPCA+ com escolha de FII (`/tools/tesouro-ipca`)
+- [x] Rankings profundos (métrica + segmento + tip didático)
+- [x] Detalhe do FII → comparação completa
+- [x] Planner contextual `?from=funds` (sem movimentar dinheiro)
+
 ## Sprint 7 — Prioridade 3 (engajamento)
 
 - [ ] Módulo Aprender (trilhas iniciais com lições)

@@ -13,6 +13,7 @@ export interface ModulePreviewData {
   headline: string;
   detail: string;
   icon: ModuleIconName;
+  /** Mantido por compatibilidade; atalhos usam sempre o amarelo padrão. */
   accent?: 'primary' | 'soft';
 }
 
@@ -21,16 +22,10 @@ interface ModulePreviewCardProps {
 }
 
 export function ModulePreviewCard({ module }: ModulePreviewCardProps) {
-  const accent = module.accent ?? 'soft';
-
   return (
     <Pressable
       onPress={() => router.push(module.href as Href)}
-      style={({ pressed }) => [
-        styles.card,
-        accent === 'primary' && styles.primary,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
       <View style={styles.header}>
         <ModuleIcon name={module.icon} size={20} tone="yellow" />
@@ -62,15 +57,12 @@ export function ModulePreviewCard({ module }: ModulePreviewCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.surfaceElevated,
+    backgroundColor: colors.surfaceWarm,
     borderRadius: radii.lg,
     padding: spacing.md,
     gap: spacing.xs,
     minHeight: 140,
     ...shadows.card,
-  },
-  primary: {
-    backgroundColor: colors.surfaceWarm,
   },
   pressed: {
     opacity: 0.94,

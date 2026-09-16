@@ -16,6 +16,7 @@ export type {
   PlannerCheckIn,
   PlannerChallengeDays,
   PlannerWeekDay,
+  PlannerDayStatus,
 } from '@/src/domain/planner';
 export type {
   LearningTrack,
@@ -23,5 +24,12 @@ export type {
   LearningTrackId,
 } from '@/src/domain/learning';
 export type { RankingEntry, RankingMetric, RankingBoard } from '@/src/domain/ranking';
+export {
+  RANKING_METRIC_OPTIONS,
+  TESOURO_IPCA_RATE,
+  buildTesouroReading,
+  toTesouroComparisonView,
+} from '@/src/domain/fundsTools';
+export type { TesouroComparisonView } from '@/src/domain/fundsTools';
 export type { NewsItem } from '@/src/domain/news';
 export type { InvestorProfileAnswers } from '@/src/domain/investorProfile';

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 
 import { Button, Container, Input, ScreenHeader, Typography } from '@/src/components';
 import { ModuleIcon } from '@/src/components/ModuleIcon';
-import { PlannerWeekStrip, SavingsBars } from '@/src/components/PlannerProgress';
+import { PlannerWeekStrip, SavingsEvolution } from '@/src/components/PlannerProgress';
 import { StreakHero } from '@/src/components/StreakHero';
 import type { PlannerChallengeDays } from '@/src/domain/planner';
 import { usePlanner } from '@/src/hooks/usePlanner';
@@ -17,6 +18,8 @@ const PRESETS: Array<{ days: PlannerChallengeDays; label: string; hint: string }
 ];
 
 export function PlannerScreen() {
+  const params = useLocalSearchParams<{ from?: string }>();
+  const fromFunds = params.from === 'funds';
   const {
     challenge,
     checkIns,
@@ -54,9 +57,26 @@ export function PlannerScreen() {
       <Container scroll keyboardAware contentStyle={styles.content} safeBottom>
         <ScreenHeader
           title="Planner de poupança"
-          subtitle="Escreva seu objetivo e escolha o ritmo. O dinheiro fica onde você quiser."
+          subtitle={
+            fromFunds
+              ? 'Depois de estudar FIIs, organize o hábito de poupar — sem mover dinheiro pelo app.'
+              : 'Escreva seu objetivo e escolha o ritmo. O dinheiro fica onde você quiser.'
+          }
           showBack
         />
+
+        {fromFunds ? (
+          <View style={styles.infoCard}>
+            <ModuleIcon name="funds" size={20} tone="light" />
+            <View style={styles.infoText}>
+              <Typography variant="bodyStrong">Vindo de Fundos</Typography>
+              <Typography variant="caption" color={colors.textMuted}>
+                Aqui você só define meta e check-ins. Consulta de FIIs fica na aba Fundos; posição
+                pessoal na Carteira.
+              </Typography>
+            </View>
+          </View>
+        ) : null}
 
         <View style={styles.infoCard}>
           <ModuleIcon name="savings" size={20} tone="yellow" />
@@ -128,9 +148,25 @@ export function PlannerScreen() {
     <Container scroll keyboardAware contentStyle={styles.content} safeBottom>
       <ScreenHeader
         title={challenge.title}
-        subtitle="Acompanhe o que já poupou e quanto falta — com o seu objetivo em destaque."
+        subtitle={
+          fromFunds
+            ? 'Meta ativa — o planner só acompanha hábito; FIIs e posição ficam em Fundos e Carteira.'
+            : 'Acompanhe o que já poupou e quanto falta — com o seu objetivo em destaque.'
+        }
         showBack
       />
+
+      {fromFunds ? (
+        <View style={styles.infoCard}>
+          <ModuleIcon name="funds" size={20} tone="light" />
+          <View style={styles.infoText}>
+            <Typography variant="bodyStrong">Contexto Fundos</Typography>
+            <Typography variant="caption" color={colors.textMuted}>
+              Sem movimentação de dinheiro. Use check-ins para constância após estudar os FIIs.
+            </Typography>
+          </View>
+        </View>
+      ) : null}
 
       <View style={styles.objectiveCard}>
         <View style={styles.objectiveHead}>
@@ -187,7 +223,10 @@ export function PlannerScreen() {
 
       <View style={styles.section}>
         <Typography variant="h3">Evolução dos aportes</Typography>
-        <SavingsBars checkIns={checkIns} />
+        <Typography variant="caption" color={colors.textMuted}>
+          Dias sem check-in são marcados automaticamente — a meta segue sem pendência.
+        </Typography>
+        <SavingsEvolution checkIns={checkIns} />
       </View>
 
       <Button

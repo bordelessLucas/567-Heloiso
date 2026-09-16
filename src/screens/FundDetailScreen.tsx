@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, type Href } from 'expo-router';
 
 import { Container, ScreenHeader, Typography } from '@/src/components';
 import { ChangeBadge } from '@/src/components/ChangeBadge';
 import { FUND_SEGMENT_LABELS } from '@/src/domain/fund';
 import { useFundDetail } from '@/src/hooks/useFundDetail';
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
 import {
   formatBrl,
   formatCompactBrl,
@@ -98,6 +98,15 @@ export function FundDetailScreen() {
             <Typography variant="caption" color={colors.textMuted}>
               {fund.tesouroIpcaComparison.note}
             </Typography>
+            <Pressable
+              onPress={() =>
+                router.push(`/tools/tesouro-ipca?ticker=${fund.ticker}` as Href)
+              }
+            >
+              <Typography variant="label" color={colors.primaryDark}>
+                Abrir comparação completa →
+              </Typography>
+            </Pressable>
           </View>
         </View>
       ) : null}
@@ -219,11 +228,10 @@ const styles = StyleSheet.create({
   },
   priceCard: {
     gap: spacing.sm,
-    backgroundColor: colors.surface,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: radii.lg,
     padding: spacing.lg,
+    ...shadows.card,
   },
   tabs: {
     flexDirection: 'row',
@@ -231,16 +239,13 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   tab: {
-    borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radii.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceElevated,
   },
   tabActive: {
     backgroundColor: colors.primary,
-    borderColor: colors.primary,
   },
   block: {
     gap: spacing.md,
@@ -252,30 +257,27 @@ const styles = StyleSheet.create({
   },
   metric: {
     width: '47%',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceElevated,
     borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.md,
     gap: 4,
+    ...shadows.card,
   },
   card: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceElevated,
     borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.md,
     gap: spacing.xs,
+    ...shadows.card,
   },
   allocRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceElevated,
     borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.md,
+    ...shadows.card,
   },
   allocMeta: {
     flex: 1,

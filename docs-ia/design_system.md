@@ -10,11 +10,11 @@
 
 - Sofisticada, simples, elegante, moderna, financeira e profissional
 - Excelente hierarquia tipográfica
-- Cards limpos **sem borda pesada** — hierarquia por fundo (elevated / warm / muted)
+- Cards limpos **sem borda pesada** — hierarquia por fundo (`surfaceFeature` > `surfaceWarm` > elevated)
 - Gráficos legíveis; números financeiros com destaque
 - Navegação simples; evitar excesso de informação por tela
 - Identidade **não infantil** (planner/gamificação inclusive)
-- Home: **um** destaque de Planner (streak); demais módulos em previews com ícone
+- Home: **dois** destaques principais (Planner + Carteira) em `surfaceFeature`; atalhos em `surfaceWarm`
 
 Referência de organização: apps financeiros modernos — **sem copiar** layouts ou marcas de terceiros.
 
@@ -27,7 +27,8 @@ Referência de organização: apps financeiros modernos — **sem copiar** layou
 | `black` | `#0D0D0D` | Texto forte, headers, contraste |
 | `background` | `#EFEDE8` | Fundo de tela (quente e suave) |
 | `surface` / `surfaceElevated` | `#FBFBF9` / `#FFFFFF` | Superfícies e cards |
-| `surfaceWarm` | `#F7F1E3` | Destaques suaves (planner, alertas leves) |
+| `surfaceWarm` | `#F7F1E3` | Atalhos / funcionalidades (padrão amarelo suave) |
+| `surfaceFeature` | `#EDE0C4` | Cards principais da Home (Planner, Carteira) |
 | `surfaceMuted` | `#F5F3EE` | Headers internos |
 | `text` | `#0D0D0D` | Texto principal |
 | `textMuted` | `#6B7280` | Texto auxiliar, captions |

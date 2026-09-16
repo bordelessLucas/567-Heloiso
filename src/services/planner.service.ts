@@ -4,6 +4,7 @@ import type {
   PlannerChallenge,
   PlannerChallengeDays,
   PlannerCheckIn,
+  PlannerDayStatus,
   PlannerWeekDay,
 } from '@/src/domain/planner';
 import {
@@ -34,6 +35,7 @@ async function readStore(): Promise<PlannerStore> {
     };
   }
 
+  parsed.checkIns = (parsed.checkIns ?? []).map(normalizeCheckIn);
   return parsed;
 }
 
@@ -41,10 +43,150 @@ async function writeStore(store: PlannerStore): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(store));
 }
 
+function normalizeCheckIn(item: PlannerCheckIn): PlannerCheckIn {
+  return {
+    ...item,
+    status: item.status ?? 'done',
+  };
+}
+
 function dayDiff(fromKey: string, toKey: string): number {
   const from = new Date(`${fromKey}T12:00:00`);
   const to = new Date(`${toKey}T12:00:00`);
   return Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function eachDateKey(fromKey: string, toKey: string): string[] {
+  const keys: string[] = [];
+  if (dayDiff(fromKey, toKey) < 0) return keys;
+
+  const cursor = new Date(`${fromKey}T12:00:00`);
+  const end = new Date(`${toKey}T12:00:00`);
+  while (cursor.getTime() <= end.getTime()) {
+    keys.push(todayKey(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return keys;
+}
+
+function recomputeChallenge(
+  challenge: PlannerChallenge,
+  entries: PlannerCheckIn[],
+): PlannerChallenge {
+  const done = entries.filter((item) => item.status === 'done');
+  const savedAmount = done.reduce((sum, item) => sum + item.amount, 0);
+  const completedDays = entries.length;
+
+  let streak = 0;
+  for (let i = entries.length - 1; i >= 0; i -= 1) {
+    if (entries[i]?.status === 'done') {
+      streak += 1;
+    } else {
+      break;
+    }
+  }
+
+  const lastDone = [...done].reverse()[0] ?? null;
+
+  return {
+    ...challenge,
+    completedDays,
+    savedAmount,
+    streak,
+    longestStreak: Math.max(challenge.longestStreak, streak),
+    lastCheckInDate: lastDone?.dateKey ?? null,
+    status: completedDays >= challenge.totalDays ? 'completed' : challenge.status === 'paused' ? 'paused' : 'active',
+  };
+}
+
+/**
+ * Marca automaticamente dias passados sem check-in como `missed`.
+ * A meta avança (sem pendência de ontem); o usuário só vê que não houve aporte.
+ */
+export async function reconcileMissedDays(): Promise<{
+  challenge: PlannerChallenge | null;
+  checkIns: PlannerCheckIn[];
+}> {
+  const store = await readStore();
+  if (!store.challenge || store.challenge.status !== 'active') {
+    return {
+      challenge: store.challenge,
+      checkIns: store.challenge
+        ? store.checkIns.filter((item) => item.challengeId === store.challenge!.id)
+        : [],
+    };
+  }
+
+  const challenge = store.challenge;
+  const existing = store.checkIns
+    .filter((item) => item.challengeId === challenge.id)
+    .map(normalizeCheckIn);
+  const byDate = new Map(existing.map((item) => [item.dateKey, item]));
+
+  const startKey = todayKey(new Date(challenge.startedAt));
+  const today = todayKey();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = todayKey(yesterday);
+
+  const pastKeys = eachDateKey(startKey, yesterdayKey);
+  const rebuilt: PlannerCheckIn[] = [];
+
+  pastKeys.forEach((dateKey, index) => {
+    const found = byDate.get(dateKey);
+    if (found?.status === 'done') {
+      rebuilt.push({
+        ...found,
+        dayNumber: index + 1,
+        status: 'done',
+      });
+      return;
+    }
+
+    rebuilt.push({
+      id: found?.id ?? `missed_${challenge.id}_${dateKey}`,
+      challengeId: challenge.id,
+      dayNumber: index + 1,
+      amount: 0,
+      dateKey,
+      checkedAt: found?.checkedAt ?? `${dateKey}T23:59:59.000Z`,
+      note: found?.note ?? null,
+      status: 'missed',
+    });
+  });
+
+  const todayEntry = byDate.get(today);
+  if (todayEntry?.status === 'done') {
+    rebuilt.push({
+      ...todayEntry,
+      dayNumber: rebuilt.length + 1,
+      status: 'done',
+    });
+  }
+
+  const nextChallenge = recomputeChallenge(challenge, rebuilt);
+  const unchanged =
+    rebuilt.length === existing.length &&
+    rebuilt.every((item, index) => {
+      const prev = existing[index];
+      return (
+        prev &&
+        prev.id === item.id &&
+        prev.status === item.status &&
+        prev.dayNumber === item.dayNumber &&
+        prev.amount === item.amount
+      );
+    }) &&
+    nextChallenge.completedDays === challenge.completedDays &&
+    nextChallenge.savedAmount === challenge.savedAmount &&
+    nextChallenge.streak === challenge.streak &&
+    nextChallenge.status === challenge.status;
+
+  if (!unchanged) {
+    await writeStore({ challenge: nextChallenge, checkIns: rebuilt });
+  }
+
+  return { challenge: nextChallenge, checkIns: rebuilt };
 }
 
 /** Garante streak demo na conta lorenzo@gmail.com quando não há desafio ativo. */
@@ -67,13 +209,13 @@ export async function ensureDemoPlannerSeed(
 }
 
 export async function getActiveChallenge(): Promise<PlannerChallenge | null> {
-  const store = await readStore();
-  return store.challenge;
+  const reconciled = await reconcileMissedDays();
+  return reconciled.challenge;
 }
 
 export async function listCheckIns(challengeId: string): Promise<PlannerCheckIn[]> {
-  const store = await readStore();
-  return store.checkIns.filter((item) => item.challengeId === challengeId);
+  const reconciled = await reconcileMissedDays();
+  return reconciled.checkIns.filter((item) => item.challengeId === challengeId);
 }
 
 export async function startChallenge(input: {
@@ -131,24 +273,25 @@ export async function performCheckIn(input: {
   amount?: number;
   note?: string;
 }): Promise<{ challenge: PlannerChallenge; checkIn: PlannerCheckIn }> {
+  await reconcileMissedDays();
   const store = await readStore();
   if (!store.challenge || store.challenge.status !== 'active') {
     throw new Error('Nenhum desafio ativo.');
   }
 
   const dateKey = todayKey();
-  if (store.challenge.lastCheckInDate === dateKey) {
+  const alreadyToday = store.checkIns.some(
+    (item) =>
+      item.challengeId === store.challenge!.id &&
+      item.dateKey === dateKey &&
+      item.status === 'done',
+  );
+  if (alreadyToday) {
     throw new Error('Check-in de hoje já registrado.');
   }
 
   const amount = input.amount ?? store.challenge.dailyTargetAmount;
   const nextDay = store.challenge.completedDays + 1;
-
-  let streak = 1;
-  if (store.challenge.lastCheckInDate) {
-    const gap = dayDiff(store.challenge.lastCheckInDate, dateKey);
-    streak = gap === 1 ? store.challenge.streak + 1 : 1;
-  }
 
   const checkIn: PlannerCheckIn = {
     id: `checkin_${Date.now()}`,
@@ -158,28 +301,27 @@ export async function performCheckIn(input: {
     dateKey,
     checkedAt: new Date().toISOString(),
     note: input.note ?? null,
+    status: 'done',
   };
 
-  const challenge: PlannerChallenge = {
-    ...store.challenge,
-    completedDays: nextDay,
-    savedAmount: store.challenge.savedAmount + amount,
-    streak,
-    longestStreak: Math.max(store.challenge.longestStreak, streak),
-    lastCheckInDate: dateKey,
-    status: nextDay >= store.challenge.totalDays ? 'completed' : 'active',
-  };
+  const entries = [
+    ...store.checkIns.filter((item) => item.challengeId === store.challenge!.id),
+    checkIn,
+  ];
+  const challenge = recomputeChallenge(store.challenge, entries);
 
   await writeStore({
     challenge,
-    checkIns: [...store.checkIns, checkIn],
+    checkIns: entries,
   });
 
   return { challenge, checkIn };
 }
 
 export async function getWeekStrip(checkIns: PlannerCheckIn[]): Promise<PlannerWeekDay[]> {
-  const checked = new Set(checkIns.map((item) => item.dateKey));
+  const byDate = new Map(
+    checkIns.map((item) => [item.dateKey, item.status as PlannerDayStatus]),
+  );
   const today = new Date();
   const days: PlannerWeekDay[] = [];
   const labels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
@@ -188,10 +330,12 @@ export async function getWeekStrip(checkIns: PlannerCheckIn[]): Promise<PlannerW
     const date = new Date(today);
     date.setDate(today.getDate() + offset);
     const dateKey = todayKey(date);
+    const status = byDate.get(dateKey);
     days.push({
       dateKey,
       label: labels[date.getDay()] ?? '•',
-      checked: checked.has(dateKey),
+      checked: status === 'done',
+      missed: status === 'missed',
       isToday: offset === 0,
     });
   }
@@ -201,5 +345,6 @@ export async function getWeekStrip(checkIns: PlannerCheckIn[]): Promise<PlannerW
 
 export async function resetPlanner(): Promise<void> {
   await writeStore({ challenge: null, checkIns: [] });
+  await AsyncStorage.setItem(DEMO_SEEDED_KEY, '');
   await AsyncStorage.removeItem(DEMO_SEEDED_KEY);
 }

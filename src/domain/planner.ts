@@ -2,6 +2,8 @@
 
 export type PlannerChallengeDays = 50 | 100 | 200;
 
+export type PlannerDayStatus = 'done' | 'missed';
+
 export interface PlannerChallenge {
   id: string;
   userId: string;
@@ -11,6 +13,7 @@ export interface PlannerChallenge {
   totalDays: PlannerChallengeDays;
   dailyTargetAmount: number;
   startedAt: string;
+  /** Dias já contabilizados no desafio (check-in + dias sem aporte). */
   completedDays: number;
   savedAmount: number;
   streak: number;
@@ -27,11 +30,14 @@ export interface PlannerCheckIn {
   dateKey: string;
   checkedAt: string;
   note: string | null;
+  /** `done` = aporte marcado; `missed` = dia passado sem check-in (auto). */
+  status: PlannerDayStatus;
 }
 
 export interface PlannerWeekDay {
   dateKey: string;
   label: string;
   checked: boolean;
+  missed: boolean;
   isToday: boolean;
 }

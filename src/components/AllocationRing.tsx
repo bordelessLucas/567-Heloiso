@@ -175,7 +175,7 @@ export function AllocationRing({
     ? slices.find((slice) => slice.ticker === selected) ?? null
     : null;
   const positive = daily.percent >= 0;
-  const edgeColor = isHero ? colors.surfaceWarm : colors.surfaceElevated;
+  const edgeColor = isHero ? colors.surfaceFeature : colors.surfaceElevated;
 
   const selectSlice = (ticker: string) => {
     LayoutAnimation.configureNext({
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     ...shadows.card,
   },
   cardHero: {
-    backgroundColor: colors.surfaceWarm,
+    backgroundColor: colors.surfaceFeature,
     padding: spacing.lg,
   },
   pressed: {

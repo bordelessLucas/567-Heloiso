@@ -145,19 +145,29 @@ export function buildDemoPlanner(userId: string): {
     const date = new Date(today);
     date.setDate(today.getDate() - i);
     const dateKey = todayKey(date);
+    // Dia -3 fica sem aporte (missed) para demonstrar a reconciliação.
+    const missed = i === 3;
     checkIns.push({
       id: `demo_checkin_${i}`,
       challengeId,
       dayNumber: 12 - i,
-      amount: 25,
+      amount: missed ? 0 : 25,
       dateKey,
       checkedAt: `${dateKey}T20:00:00.000Z`,
       note: null,
+      status: missed ? 'missed' : 'done',
     });
   }
 
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
+
+  const done = checkIns.filter((item) => item.status === 'done');
+  let streak = 0;
+  for (let i = checkIns.length - 1; i >= 0; i -= 1) {
+    if (checkIns[i]?.status === 'done') streak += 1;
+    else break;
+  }
 
   const challenge: PlannerChallenge = {
     id: challengeId,
@@ -167,10 +177,10 @@ export function buildDemoPlanner(userId: string): {
     totalDays: 100,
     dailyTargetAmount: 25,
     startedAt: checkIns[0]?.checkedAt ?? new Date().toISOString(),
-    completedDays: 11,
-    savedAmount: 275,
-    streak: 11,
-    longestStreak: 11,
+    completedDays: checkIns.length,
+    savedAmount: done.reduce((sum, item) => sum + item.amount, 0),
+    streak,
+    longestStreak: Math.max(streak, 3),
     status: 'active',
     lastCheckInDate: todayKey(yesterday),
   };
