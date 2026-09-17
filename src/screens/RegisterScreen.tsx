@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Link, router } from 'expo-router';
 
-import { Button, Container, Input, Typography } from '@/src/components';
+import { BrandLogo, Button, Container, Input, Typography } from '@/src/components';
 import { useAuth } from '@/src/hooks/useAuth';
 import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { colors, spacing } from '@/src/theme/tokens';
@@ -50,6 +50,7 @@ export function RegisterScreen() {
   return (
     <Container keyboardAware scroll contentStyle={styles.content} safeBottom>
       <View style={styles.header}>
+        <BrandLogo width={184} />
         <Typography variant="h1">Criar conta</Typography>
         <Typography variant="body" color={colors.textMuted}>
           Cadastro básico: nome, e-mail e senha. Dados financeiros ficam separados e

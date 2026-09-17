@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 
-import { Container, Typography } from '@/src/components';
+import { BrandLogo, Container, Typography } from '@/src/components';
 import { AllocationRing } from '@/src/components/AllocationRing';
 import { HomeStreakCard } from '@/src/components/HomeStreakCard';
 import { ModuleIcon } from '@/src/components/ModuleIcon';
@@ -99,9 +99,7 @@ export function HomeScreen() {
     <Container scroll contentStyle={styles.content}>
       <View style={styles.navbar}>
         <View style={styles.navText}>
-          <Typography variant="caption" color={colors.textMuted}>
-            Mercado FiiS
-          </Typography>
+          <BrandLogo width={124} />
           <Typography variant="h2">Olá, {displayName}</Typography>
           {demo ? (
             <Typography variant="caption" color={colors.primaryDark}>

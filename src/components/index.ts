@@ -34,3 +34,4 @@ export { FadeEdgeScroll } from '@/src/components/FadeEdgeScroll';
 export { FadeEdgeScrollVertical } from '@/src/components/FadeEdgeScrollVertical';
 export { AssetTile } from '@/src/components/AssetTile';
 export { AllocationRing } from '@/src/components/AllocationRing';
+export { BrandLogo } from '@/src/components/BrandLogo';
