@@ -1,7 +1,9 @@
 import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { Container, EmptyState, ScreenHeader, Typography } from '@/src/components';
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import { colors, radii, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 interface ModuleScreenProps {
   title: string;
@@ -20,6 +22,8 @@ export function ModuleScreen({
   showBack = false,
   sections = [],
 }: ModuleScreenProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Container scroll contentStyle={styles.content}>
       <ScreenHeader title={title} subtitle={subtitle} showBack={showBack} />
@@ -39,7 +43,7 @@ export function ModuleScreen({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   content: {
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -52,4 +56,4 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     padding: spacing.md,
   },
-});
+}); }

@@ -1,7 +1,9 @@
 import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import { colors, radii, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 export type ModuleIconName =
   | 'funds'
@@ -38,6 +40,8 @@ interface ModuleIconProps {
 }
 
 export function ModuleIcon({ name, size = 22, tone = 'yellow' }: ModuleIconProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const palette =
     tone === 'yellow'
       ? { bg: colors.primary, icon: colors.black }
@@ -52,10 +56,10 @@ export function ModuleIcon({ name, size = 22, tone = 'yellow' }: ModuleIconProps
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   wrap: {
     borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+}); }

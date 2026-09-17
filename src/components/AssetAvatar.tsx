@@ -1,8 +1,10 @@
 import { Image, StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { Typography } from '@/src/components/Typography';
 import { getFundLogoSource } from '@/src/data/fundLogos';
-import { colors } from '@/src/theme/tokens';
+import { colors, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 const AVATAR_PALETTE = [
   '#F0B429',
@@ -36,6 +38,8 @@ interface AssetAvatarProps {
 }
 
 export function AssetAvatar({ ticker, name, size = 40 }: AssetAvatarProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const source = getFundLogoSource(ticker);
   const radius = Math.max(8, size * 0.22);
   const initials = initialsFrom(ticker, name);
@@ -85,7 +89,7 @@ export function AssetAvatar({ ticker, name, size = 40 }: AssetAvatarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   frame: {
     overflow: 'hidden',
     backgroundColor: colors.surfaceMuted,
@@ -98,4 +102,4 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
   },
-});
+}); }

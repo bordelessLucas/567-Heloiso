@@ -14,10 +14,13 @@ import {
   listFundsByRankingMetric,
   listRankingBoards,
 } from '@/src/services/funds.service';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatCompactBrl, formatPercent, formatRatio } from '@/src/utils/format';
 
 export function RankingsScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [boards, setBoards] = useState<RankingBoard[]>([]);
   const [funds, setFunds] = useState<FundSummary[]>([]);
   const [metric, setMetric] = useState<RankingMetric>('dividend_yield');
@@ -170,7 +173,7 @@ function metricValueLabel(metric: RankingMetric, fund: FundSummary): string {
   return '—';
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   content: {
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -213,4 +216,4 @@ const styles = StyleSheet.create({
   rankItem: {
     width: '100%',
   },
-});
+}); }

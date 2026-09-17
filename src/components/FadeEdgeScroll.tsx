@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { colors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 interface FadeEdgeScrollProps {
   children: ReactNode;
@@ -32,11 +33,13 @@ interface FadeEdgeScrollProps {
 export function FadeEdgeScroll({
   children,
   contentContainerStyle,
-  edgeColor = colors.background,
+  edgeColor,
   edgeWidth = 36,
   preferTrailingFade = false,
   softLeadingFade = false,
 }: FadeEdgeScrollProps) {
+  const { colors } = useAppTheme();
+  const resolvedEdgeColor = edgeColor ?? colors.background;
   const [layoutWidth, setLayoutWidth] = useState(0);
   const [contentWidth, setContentWidth] = useState(0);
   const [offsetX, setOffsetX] = useState(0);
@@ -110,7 +113,7 @@ export function FadeEdgeScroll({
         style={[styles.edge, styles.left, { width: edgeWidth }, leftStyle]}
       >
         <LinearGradient
-          colors={[edgeColor, 'transparent']}
+          colors={[resolvedEdgeColor, 'transparent']}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={StyleSheet.absoluteFill}
@@ -122,7 +125,7 @@ export function FadeEdgeScroll({
         style={[styles.edge, styles.right, { width: edgeWidth }, rightStyle]}
       >
         <LinearGradient
-          colors={['transparent', edgeColor]}
+          colors={['transparent', resolvedEdgeColor]}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={StyleSheet.absoluteFill}

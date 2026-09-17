@@ -3,7 +3,7 @@ import { Redirect } from 'expo-router';
 import type { ReactNode } from 'react';
 
 import { useAuth } from '@/src/hooks/useAuth';
-import { colors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 interface AuthGateProps {
   children: ReactNode;
@@ -11,10 +11,11 @@ interface AuthGateProps {
 
 export function AuthGate({ children }: AuthGateProps) {
   const { isAuthenticated, isLoading } = useAuth();
+  const { colors } = useAppTheme();
 
   if (isLoading) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );
@@ -32,6 +33,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.background,
   },
 });

@@ -13,7 +13,8 @@ import Animated, {
 
 import { Typography } from '@/src/components/Typography';
 import type { PricePoint } from '@/src/domain/portfolio';
-import { colors, radii, spacing, typography } from '@/src/theme/tokens';
+import { colors, radii, spacing, typography, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl, formatCompactBrl } from '@/src/utils/format';
 
 const MAX_VISIBLE_BARS = 32;
@@ -60,6 +61,8 @@ export function SparklineChart({
   positive,
   showRange = true,
 }: SparklineChartProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [width, setWidth] = useState(0);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const opacity = useSharedValue(1);
@@ -99,7 +102,7 @@ export function SparklineChart({
 
   const isUp = positive ?? stats.up;
   const tone = isUp ? colors.success : colors.danger;
-  const fill = isUp ? '#E8F5EF' : '#FCEBEB';
+  const fill = isUp ? colors.surfaceWarm : colors.surfaceMuted;
 
   const bars = useMemo(() => {
     if (visible.length === 0) return [];
@@ -293,7 +296,7 @@ export function SparklineChart({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   wrap: {
     gap: spacing.sm,
     width: '100%',
@@ -376,4 +379,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surfaceElevated,
     borderWidth: 2,
   },
-});
+}); }

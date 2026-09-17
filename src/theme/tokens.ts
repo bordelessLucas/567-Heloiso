@@ -1,31 +1,12 @@
+import { lightColors } from '@/src/theme/palettes';
+
 /**
  * Design tokens — Mercado FiiS
  * Fonte: docs-ia/design_system.md
- *
- * Tipografia: Inter (mesma família usada publicamente pelo ecossistema OpenAI /
- * produtos AI modernos — OpenAI Sans proprietária não é distribuída para apps).
  */
-export const colors = {
-  primary: '#F0B429',
-  primaryDark: '#C49214',
-  black: '#0D0D0D',
-  background: '#EFEDE8',
-  surface: '#FBFBF9',
-  text: '#0D0D0D',
-  textMuted: '#6B7280',
-  border: '#E8E6E0',
-  borderSubtle: '#F0EEE9',
-  surfaceElevated: '#FFFFFF',
-  surfaceMuted: '#F5F3EE',
-  /** Cards de atalho / funcionalidade (padrão amarelo suave). */
-  surfaceWarm: '#F7F1E3',
-  /** Cards principais da Home (Planner, Carteira) — um tom mais marcado. */
-  surfaceFeature: '#EDE0C4',
-  danger: '#B42318',
-  success: '#067647',
-  warning: '#B54708',
-  neutral: '#79716B',
-} as const;
+
+/** @deprecated Em componentes renderizados, use useAppTheme().colors. */
+export const colors = lightColors;
 
 export const spacing = {
   xs: 4,
@@ -67,7 +48,7 @@ export const radii = {
   full: 999,
 } as const;
 
-/** Sombra discreta para cards/módulos (iOS + Android). */
+/** Sombra discreta para cards e módulos. */
 export const shadows = {
   card: {
     shadowColor: '#0D0D0D',
@@ -80,3 +61,4 @@ export const shadows = {
 
 export type ColorToken = keyof typeof colors;
 export type SpacingToken = keyof typeof spacing;
+export type { AppColors, ResolvedTheme, ThemePreference } from '@/src/theme/palettes';

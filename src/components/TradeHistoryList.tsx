@@ -1,8 +1,10 @@
 import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { Typography } from '@/src/components/Typography';
 import type { PortfolioTrade } from '@/src/domain/portfolio';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl } from '@/src/utils/format';
 
 interface TradeHistoryListProps {
@@ -24,6 +26,8 @@ export function TradeHistoryList({
   trades,
   emptyLabel = 'Nenhuma movimentação neste período.',
 }: TradeHistoryListProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   if (trades.length === 0) {
     return (
       <View style={styles.empty}>
@@ -73,7 +77,7 @@ export function TradeHistoryList({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   list: {
     gap: spacing.sm,
   },
@@ -106,4 +110,4 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
-});
+}); }

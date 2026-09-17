@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { colors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 interface FadeEdgeScrollVerticalProps {
   children: ReactNode;
@@ -32,10 +33,12 @@ export function FadeEdgeScrollVertical({
   children,
   contentContainerStyle,
   style,
-  edgeColor = colors.surfaceWarm,
+  edgeColor,
   edgeHeight = 28,
   preferBottomFade = true,
 }: FadeEdgeScrollVerticalProps) {
+  const { colors } = useAppTheme();
+  const resolvedEdgeColor = edgeColor ?? colors.surfaceWarm;
   const [layoutHeight, setLayoutHeight] = useState(0);
   const [contentHeight, setContentHeight] = useState(0);
   const [offsetY, setOffsetY] = useState(0);
@@ -91,7 +94,7 @@ export function FadeEdgeScrollVertical({
         style={[styles.edge, styles.top, { height: edgeHeight }, topStyle]}
       >
         <LinearGradient
-          colors={[edgeColor, 'transparent']}
+          colors={[resolvedEdgeColor, 'transparent']}
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>
@@ -101,7 +104,7 @@ export function FadeEdgeScrollVertical({
         style={[styles.edge, styles.bottom, { height: edgeHeight }, bottomStyle]}
       >
         <LinearGradient
-          colors={['transparent', edgeColor]}
+          colors={['transparent', resolvedEdgeColor]}
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>

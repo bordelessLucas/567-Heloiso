@@ -12,7 +12,8 @@ import { FadeEdgeScrollVertical } from '@/src/components/FadeEdgeScrollVertical'
 import { ModuleIcon } from '@/src/components/ModuleIcon';
 import { Typography } from '@/src/components/Typography';
 import type { PortfolioPositionView } from '@/src/services/portfolio.service';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl, formatCompactBrl, formatPercent } from '@/src/utils/format';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -115,6 +116,8 @@ export function AllocationRing({
   variant = 'hero',
   title = 'Sua carteira agora',
 }: AllocationRingProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [selected, setSelected] = useState<string | null>(null);
   const appear = useSharedValue(0);
 
@@ -349,7 +352,7 @@ export function AllocationRing({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceElevated,
     borderRadius: radii.lg,
@@ -435,4 +438,4 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
   },
-});
+}); }

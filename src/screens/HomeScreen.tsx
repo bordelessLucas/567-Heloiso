@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 
-import { Container, Typography } from '@/src/components';
+import { BrandLogo, Container, Typography } from '@/src/components';
 import { AllocationRing } from '@/src/components/AllocationRing';
 import { HomeStreakCard } from '@/src/components/HomeStreakCard';
 import { ModuleIcon } from '@/src/components/ModuleIcon';
@@ -15,10 +15,13 @@ import { useAuth } from '@/src/hooks/useAuth';
 import { usePlanner } from '@/src/hooks/usePlanner';
 import { usePortfolio } from '@/src/hooks/usePortfolio';
 import { useFundsCatalog } from '@/src/hooks/useFundsCatalog';
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import { colors, radii, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl, formatPercent } from '@/src/utils/format';
 
 export function HomeScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { profile, user } = useAuth();
   const { challenge, loading: plannerLoading } = usePlanner();
   const { dashboard, loading: portfolioLoading } = usePortfolio();
@@ -96,9 +99,7 @@ export function HomeScreen() {
     <Container scroll contentStyle={styles.content}>
       <View style={styles.navbar}>
         <View style={styles.navText}>
-          <Typography variant="caption" color={colors.textMuted}>
-            Mercado FiiS
-          </Typography>
+          <BrandLogo width={124} />
           <Typography variant="h2">Olá, {displayName}</Typography>
           {demo ? (
             <Typography variant="caption" color={colors.primaryDark}>
@@ -181,7 +182,7 @@ export function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   content: {
     gap: spacing.xl,
     paddingBottom: spacing.xxl,
@@ -233,4 +234,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-});
+}); }

@@ -1,8 +1,10 @@
 import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { ModuleIcon } from '@/src/components/ModuleIcon';
 import { Typography } from '@/src/components/Typography';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 interface StreakHeroProps {
   streak: number;
@@ -21,6 +23,8 @@ export function StreakHero({
   savedAmountLabel,
   dailyTargetLabel,
 }: StreakHeroProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const clamped = Math.max(0, Math.min(1, progress));
   const remainingDays = Math.max(0, totalDays - completedDays);
 
@@ -90,7 +94,7 @@ export function StreakHero({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   wrap: {
     gap: spacing.md,
     backgroundColor: colors.surfaceElevated,
@@ -158,4 +162,4 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
-});
+}); }

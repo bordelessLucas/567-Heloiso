@@ -1,4 +1,5 @@
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 import { router, type Href } from 'expo-router';
 
 import {
@@ -15,7 +16,8 @@ import type { ModuleIconName } from '@/src/components/ModuleIcon';
 import { useFundsCatalog } from '@/src/hooks/useFundsCatalog';
 import { usePlanner } from '@/src/hooks/usePlanner';
 import { usePortfolio } from '@/src/hooks/usePortfolio';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl, formatPercent } from '@/src/utils/format';
 
 interface FundToolCard {
@@ -27,6 +29,8 @@ interface FundToolCard {
 }
 
 export function FundsScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const {
     query,
     setQuery,
@@ -242,7 +246,7 @@ export function FundsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   content: {
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -301,4 +305,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-});
+}); }

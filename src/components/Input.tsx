@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -10,7 +10,8 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors, radii, spacing, typography } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
+import { radii, spacing, typography, type AppColors } from '@/src/theme/tokens';
 
 export interface InputProps extends Omit<TextInputProps, 'style'> {
   label?: string;
@@ -29,6 +30,8 @@ export function Input({
   editable = true,
   ...rest
 }: InputProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [secure, setSecure] = useState(isPassword);
   const hasError = Boolean(error);
 
@@ -70,7 +73,8 @@ export function Input({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) {
+  return StyleSheet.create({
   wrapper: {
     width: '100%',
     gap: spacing.xs,
@@ -125,4 +129,5 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     color: colors.danger,
   },
-});
+  });
+}

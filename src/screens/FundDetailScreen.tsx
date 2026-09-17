@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams, type Href } from 'expo-router';
 
@@ -6,7 +6,8 @@ import { Container, ScreenHeader, Typography } from '@/src/components';
 import { ChangeBadge } from '@/src/components/ChangeBadge';
 import { FUND_SEGMENT_LABELS } from '@/src/domain/fund';
 import { useFundDetail } from '@/src/hooks/useFundDetail';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import {
   formatBrl,
   formatCompactBrl,
@@ -25,6 +26,8 @@ const TABS = [
 type TabId = (typeof TABS)[number]['id'];
 
 export function FundDetailScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const params = useLocalSearchParams<{ ticker: string }>();
   const ticker = typeof params.ticker === 'string' ? params.ticker : '';
   const { fund, loading } = useFundDetail(ticker);
@@ -206,6 +209,8 @@ export function FundDetailScreen() {
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.metric}>
       <Typography variant="caption" color={colors.textMuted}>
@@ -216,7 +221,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   content: {
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -289,4 +294,4 @@ const styles = StyleSheet.create({
   toneAttention: {
     borderColor: colors.warning,
   },
-});
+}); }

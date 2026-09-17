@@ -1,6 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useMemo } from 'react';
 
-import { colors, radii, spacing, typography } from '@/src/theme/tokens';
+import { colors, radii, spacing, typography, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatPercent } from '@/src/utils/format';
 
 interface ChangeBadgeProps {
@@ -8,6 +10,8 @@ interface ChangeBadgeProps {
 }
 
 export function ChangeBadge({ value }: ChangeBadgeProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   if (value === null) {
     return (
       <View style={[styles.badge, styles.neutral]}>
@@ -27,7 +31,7 @@ export function ChangeBadge({ value }: ChangeBadgeProps) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   badge: {
     borderRadius: radii.full,
     paddingHorizontal: 8,
@@ -58,4 +62,4 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: typography.fontSize.xs,
   },
-});
+}); }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { router, type Href } from 'expo-router';
 
@@ -15,10 +15,13 @@ import { SparklineChart } from '@/src/components/SparklineChart';
 import { TradeHistoryList } from '@/src/components/TradeHistoryList';
 import type { HistoryPeriodDays, PortfolioSortKey } from '@/src/domain/portfolio';
 import { usePortfolio } from '@/src/hooks/usePortfolio';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl, formatPercent } from '@/src/utils/format';
 
 export function PortfolioScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [sort, setSort] = useState<PortfolioSortKey>('default');
   const [chartDays, setChartDays] = useState<HistoryPeriodDays>(30);
   const [historyDays, setHistoryDays] = useState<HistoryPeriodDays>(30);
@@ -140,7 +143,7 @@ export function PortfolioScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   content: {
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -187,4 +190,4 @@ const styles = StyleSheet.create({
   list: {
     gap: spacing.sm,
   },
-});
+}); }

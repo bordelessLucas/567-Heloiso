@@ -1,10 +1,12 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 import { router, type Href } from 'expo-router';
 
 import { ModuleIcon } from '@/src/components/ModuleIcon';
 import { Typography } from '@/src/components/Typography';
 import type { PlannerChallenge } from '@/src/domain/planner';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl } from '@/src/utils/format';
 
 interface HomeStreakCardProps {
@@ -12,6 +14,8 @@ interface HomeStreakCardProps {
 }
 
 export function HomeStreakCard({ challenge }: HomeStreakCardProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const remaining = challenge
     ? Math.max(0, challenge.totalDays - challenge.completedDays)
     : null;
@@ -91,7 +95,7 @@ export function HomeStreakCard({ challenge }: HomeStreakCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   card: {
     gap: spacing.sm,
     backgroundColor: colors.surfaceFeature,
@@ -140,4 +144,4 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.primary,
   },
-});
+}); }

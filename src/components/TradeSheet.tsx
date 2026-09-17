@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Modal,
@@ -12,7 +12,8 @@ import { Button } from '@/src/components/Button';
 import { Input } from '@/src/components/Input';
 import { Typography } from '@/src/components/Typography';
 import type { PortfolioTradeSide } from '@/src/domain/portfolio';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl } from '@/src/utils/format';
 
 interface TradeSheetProps {
@@ -34,6 +35,8 @@ export function TradeSheet({
   onClose,
   onConfirm,
 }: TradeSheetProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [quantity, setQuantity] = useState('10');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -122,7 +125,7 @@ export function TradeSheet({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(13,13,13,0.35)',
@@ -156,4 +159,4 @@ const styles = StyleSheet.create({
   actions: {
     gap: spacing.sm,
   },
-});
+}); }
