@@ -1,9 +1,11 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { AssetAvatar } from '@/src/components/AssetAvatar';
 import { ChangeBadge } from '@/src/components/ChangeBadge';
 import { Typography } from '@/src/components/Typography';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 interface AssetTileProps {
   ticker: string;
@@ -23,6 +25,8 @@ export function AssetTile({
   metaLabel,
   onPress,
 }: AssetTileProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Pressable
       onPress={onPress}
@@ -50,7 +54,7 @@ export function AssetTile({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   tile: {
     flex: 1,
     minWidth: '46%',
@@ -69,4 +73,4 @@ const styles = StyleSheet.create({
     gap: 4,
     alignItems: 'flex-start',
   },
-});
+}); }

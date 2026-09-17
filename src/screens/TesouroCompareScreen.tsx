@@ -12,10 +12,13 @@ import { FadeEdgeScroll } from '@/src/components/FadeEdgeScroll';
 import type { FundSummary } from '@/src/domain/fund';
 import type { TesouroComparisonView } from '@/src/domain/fundsTools';
 import { listFunds, getTesouroComparison } from '@/src/services/funds.service';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatPercent } from '@/src/utils/format';
 
 export function TesouroCompareScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const params = useLocalSearchParams<{ ticker?: string }>();
   const initialTicker =
     typeof params.ticker === 'string' ? params.ticker.toUpperCase() : 'HGLG11';
@@ -198,6 +201,8 @@ function BarRow({
   ratio: number;
   tone: string;
 }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const width = `${Math.max(8, Math.min(100, ratio * 100))}%`;
   return (
     <View style={styles.barBlock}>
@@ -214,7 +219,7 @@ function BarRow({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   content: {
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -286,4 +291,4 @@ const styles = StyleSheet.create({
   list: {
     gap: spacing.sm,
   },
-});
+}); }

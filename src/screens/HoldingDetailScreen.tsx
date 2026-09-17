@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams, type Href } from 'expo-router';
 
@@ -10,10 +10,13 @@ import { TradeHistoryList } from '@/src/components/TradeHistoryList';
 import { TradeSheet } from '@/src/components/TradeSheet';
 import type { HistoryPeriodDays, PortfolioTradeSide } from '@/src/domain/portfolio';
 import { useHoldingDetail } from '@/src/hooks/usePortfolio';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl, formatPercent } from '@/src/utils/format';
 
 export function HoldingDetailScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const params = useLocalSearchParams<{ ticker: string }>();
   const ticker = String(params.ticker ?? '').toUpperCase();
   const [chartDays, setChartDays] = useState<HistoryPeriodDays>(30);
@@ -202,7 +205,7 @@ export function HoldingDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   content: {
     gap: spacing.md,
     paddingBottom: spacing.xxl,
@@ -278,4 +281,4 @@ const styles = StyleSheet.create({
     gap: 4,
     flexShrink: 0,
   },
-});
+}); }

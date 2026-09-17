@@ -4,10 +4,12 @@ import { Link, router } from 'expo-router';
 
 import { Button, Container, Input, Typography } from '@/src/components';
 import { useAuth } from '@/src/hooks/useAuth';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { colors, spacing } from '@/src/theme/tokens';
 import { getAuthErrorMessage } from '@/src/utils/authErrors';
 
 export function RegisterScreen() {
+  const { colors } = useAppTheme();
   const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -37,7 +39,7 @@ export function RegisterScreen() {
     setLoading(true);
     try {
       await signUp(name, email, password);
-      router.replace('/(tabs)');
+      router.replace('/');
     } catch (err) {
       setError(getAuthErrorMessage(err));
     } finally {

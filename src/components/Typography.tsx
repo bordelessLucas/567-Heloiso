@@ -6,7 +6,8 @@ import {
   type TextStyle,
 } from 'react-native';
 
-import { colors, typography } from '@/src/theme/tokens';
+import { typography } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 export type TypographyVariant =
   | 'display'
@@ -26,13 +27,18 @@ export interface TypographyProps extends RNTextProps {
 
 export function Typography({
   variant = 'body',
-  color = colors.text,
+  color,
   style,
   children,
   ...rest
 }: TypographyProps) {
+  const { colors: themeColors } = useAppTheme();
+
   return (
-    <RNText style={[styles.base, variantStyles[variant], { color }, style]} {...rest}>
+    <RNText
+      style={[styles.base, variantStyles[variant], { color: color ?? themeColors.text }, style]}
+      {...rest}
+    >
       {children}
     </RNText>
   );

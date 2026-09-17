@@ -1,14 +1,18 @@
 import { StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { Typography } from '@/src/components/Typography';
 import type { PlannerCheckIn, PlannerWeekDay } from '@/src/domain/planner';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl } from '@/src/utils/format';
 
 const CHART_HEIGHT = 96;
 const MAX_BARS = 14;
 
 export function PlannerWeekStrip({ week }: { week: PlannerWeekDay[] }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.week}>
       {week.map((day) => (
@@ -48,6 +52,8 @@ function dayLabel(dateKey: string): string {
 
 /** Barras diárias (aporte × sem aporte) + histórico. */
 export function SavingsEvolution({ checkIns }: { checkIns: PlannerCheckIn[] }) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const recent = checkIns.slice(-MAX_BARS);
   const history = [...checkIns].reverse();
   const doneAmount = checkIns
@@ -182,7 +188,7 @@ export function SavingsBars({ checkIns }: { checkIns: PlannerCheckIn[] }) {
   return <SavingsEvolution checkIns={checkIns} />;
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   week: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -321,4 +327,4 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
-});
+}); }

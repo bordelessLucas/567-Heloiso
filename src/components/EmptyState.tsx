@@ -1,7 +1,8 @@
 import { StyleSheet, View } from 'react-native';
 
 import { Typography } from '@/src/components/Typography';
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import { radii, spacing } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 interface EmptyStateProps {
   title: string;
@@ -9,8 +10,10 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ title, description }: EmptyStateProps) {
+  const { colors } = useAppTheme();
+
   return (
-    <View style={styles.box}>
+    <View style={[styles.box, { backgroundColor: colors.surfaceElevated }]}>
       <Typography variant="bodyStrong">{title}</Typography>
       <Typography variant="caption" color={colors.textMuted}>
         {description}
@@ -21,7 +24,6 @@ export function EmptyState({ title, description }: EmptyStateProps) {
 
 const styles = StyleSheet.create({
   box: {
-    backgroundColor: colors.surfaceElevated,
     borderRadius: radii.md,
     padding: spacing.lg,
     gap: spacing.sm,

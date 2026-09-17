@@ -4,17 +4,20 @@ import { SymbolView } from 'expo-symbols';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuth } from '@/src/hooks/useAuth';
-import { colors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
+import { useOnboarding } from '@/src/hooks/useOnboarding';
 
 export default function TabsLayout() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { colors } = useAppTheme();
+  const { isComplete, isLoading: onboardingLoading } = useOnboarding();
   const insets = useSafeAreaInsets();
   const bottomPad = Math.max(insets.bottom, 10);
   const tabBarHeight = 56 + bottomPad;
 
-  if (isLoading) {
+  if (isLoading || (isAuthenticated && onboardingLoading)) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );
@@ -22,6 +25,10 @@ export default function TabsLayout() {
 
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
+  }
+
+  if (!isComplete) {
+    return <Redirect href="/onboarding" />;
   }
 
   return (
@@ -122,6 +129,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.background,
   },
 });

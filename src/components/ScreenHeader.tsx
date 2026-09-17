@@ -2,7 +2,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 
 import { Typography } from '@/src/components/Typography';
-import { colors, spacing } from '@/src/theme/tokens';
+import { spacing } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 interface ScreenHeaderProps {
   title: string;
@@ -11,6 +12,7 @@ interface ScreenHeaderProps {
 }
 
 export function ScreenHeader({ title, subtitle, showBack = false }: ScreenHeaderProps) {
+  const { colors } = useAppTheme();
   return (
     <View style={styles.wrap}>
       {showBack ? (

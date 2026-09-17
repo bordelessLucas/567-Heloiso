@@ -1,4 +1,5 @@
 import { LayoutAnimation, Platform, Pressable, StyleSheet, UIManager } from 'react-native';
+import { useMemo } from 'react';
 
 import { FadeEdgeScroll } from '@/src/components/FadeEdgeScroll';
 import { Typography } from '@/src/components/Typography';
@@ -6,7 +7,8 @@ import {
   PORTFOLIO_SORT_OPTIONS,
   type PortfolioSortKey,
 } from '@/src/domain/portfolio';
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import { colors, radii, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -21,11 +23,13 @@ interface PortfolioSortChipsProps {
 export function PortfolioSortChips({
   value,
   onChange,
-  edgeColor = colors.background,
+  edgeColor,
 }: PortfolioSortChipsProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <FadeEdgeScroll
-      edgeColor={edgeColor}
+      edgeColor={edgeColor ?? colors.background}
       softLeadingFade
       preferTrailingFade
       contentContainerStyle={styles.row}
@@ -68,7 +72,7 @@ export function PortfolioSortChips({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   row: {
     gap: spacing.sm,
     paddingLeft: spacing.xs,
@@ -91,4 +95,4 @@ const styles = StyleSheet.create({
     // Mais desvalorizaram — já nasce sob o fade da borda direita
     opacity: 0.92,
   },
-});
+}); }

@@ -8,7 +8,10 @@ import {
   type ViewStyle,
 } from 'react-native';
 
-import { colors, radii, spacing, typography } from '@/src/theme/tokens';
+import { useMemo } from 'react';
+
+import { useAppTheme } from '@/src/hooks/useAppTheme';
+import { radii, spacing, typography, type AppColors } from '@/src/theme/tokens';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger';
 
@@ -29,6 +32,8 @@ export function Button({
   style,
   ...rest
 }: ButtonProps) {
+  const { colors } = useAppTheme();
+  const variantStyles = useMemo(() => createVariantStyles(colors), [colors]);
   const isDisabled = disabled || loading;
 
   return (
@@ -79,7 +84,8 @@ const styles = StyleSheet.create({
   },
 });
 
-const variantStyles = {
+function createVariantStyles(colors: AppColors) {
+  return {
   primary: StyleSheet.create({
     container: {
       backgroundColor: colors.primary,
@@ -96,7 +102,7 @@ const variantStyles = {
       backgroundColor: colors.black,
     },
     pressed: {
-      backgroundColor: '#2A2A2A',
+      backgroundColor: colors.surfaceMuted,
     },
     label: {
       color: colors.surface,
@@ -120,10 +126,11 @@ const variantStyles = {
       backgroundColor: colors.danger,
     },
     pressed: {
-      backgroundColor: '#8F1B14',
+      opacity: 0.84,
     },
     label: {
       color: colors.surfaceElevated,
     },
   }),
-};
+  };
+}

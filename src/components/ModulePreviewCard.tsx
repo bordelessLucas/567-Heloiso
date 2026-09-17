@@ -1,9 +1,11 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 import { router, type Href } from 'expo-router';
 
 import { ModuleIcon, type ModuleIconName } from '@/src/components/ModuleIcon';
 import { Typography } from '@/src/components/Typography';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 export interface ModulePreviewData {
   id: string;
@@ -22,6 +24,8 @@ interface ModulePreviewCardProps {
 }
 
 export function ModulePreviewCard({ module }: ModulePreviewCardProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <Pressable
       onPress={() => router.push(module.href as Href)}
@@ -55,7 +59,7 @@ export function ModulePreviewCard({ module }: ModulePreviewCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   card: {
     backgroundColor: colors.surfaceWarm,
     borderRadius: radii.lg,
@@ -80,4 +84,4 @@ const styles = StyleSheet.create({
   cta: {
     marginTop: spacing.sm,
   },
-});
+}); }

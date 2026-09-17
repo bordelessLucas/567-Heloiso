@@ -1,15 +1,19 @@
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 import { router, type Href } from 'expo-router';
 
 import { Typography } from '@/src/components/Typography';
 import type { RankingBoard } from '@/src/domain/ranking';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 interface RankingCardsProps {
   boards: RankingBoard[];
 }
 
 export function RankingCards({ boards }: RankingCardsProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
       {boards.map((board) => (
@@ -55,7 +59,7 @@ export function RankingCards({ boards }: RankingCardsProps) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   row: {
     gap: spacing.md,
     paddingRight: spacing.lg,
@@ -90,4 +94,4 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.borderSubtle,
   },
-});
+}); }

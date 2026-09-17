@@ -2,21 +2,22 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
 
 import { useAuth } from '@/src/hooks/useAuth';
-import { colors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 export default function AuthLayout() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { colors } = useAppTheme();
 
   if (isLoading) {
     return (
-      <View style={styles.loading}>
+      <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );
   }
 
   if (isAuthenticated) {
-    return <Redirect href="/(tabs)" />;
+    return <Redirect href="/" />;
   }
 
   return (
@@ -32,6 +33,5 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.background,
   },
 });

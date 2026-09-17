@@ -1,10 +1,12 @@
 import { Pressable, StyleSheet, View } from 'react-native';
+import { useMemo } from 'react';
 
 import { AssetAvatar } from '@/src/components/AssetAvatar';
 import { ChangeBadge } from '@/src/components/ChangeBadge';
 import { Typography } from '@/src/components/Typography';
 import type { PortfolioPositionView } from '@/src/services/portfolio.service';
-import { colors, radii, shadows, spacing } from '@/src/theme/tokens';
+import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl, formatPercent } from '@/src/utils/format';
 
 interface HoldingPositionCardProps {
@@ -22,6 +24,8 @@ export function HoldingPositionCard({
   onMoveDown,
   showReorder = false,
 }: HoldingPositionCardProps) {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const positive = position.pnlAmount >= 0;
 
   return (
@@ -80,7 +84,7 @@ export function HoldingPositionCard({
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   card: {
     width: '100%',
     backgroundColor: colors.surfaceElevated,
@@ -114,4 +118,4 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     alignSelf: 'flex-end',
   },
-});
+}); }

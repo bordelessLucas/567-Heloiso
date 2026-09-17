@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 
@@ -8,7 +8,8 @@ import { PlannerWeekStrip, SavingsEvolution } from '@/src/components/PlannerProg
 import { StreakHero } from '@/src/components/StreakHero';
 import type { PlannerChallengeDays } from '@/src/domain/planner';
 import { usePlanner } from '@/src/hooks/usePlanner';
-import { colors, radii, spacing } from '@/src/theme/tokens';
+import { colors, radii, spacing, type AppColors } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 import { formatBrl } from '@/src/utils/format';
 
 const PRESETS: Array<{ days: PlannerChallengeDays; label: string; hint: string }> = [
@@ -18,6 +19,8 @@ const PRESETS: Array<{ days: PlannerChallengeDays; label: string; hint: string }
 ];
 
 export function PlannerScreen() {
+  const { colors } = useAppTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const params = useLocalSearchParams<{ from?: string }>();
   const fromFunds = params.from === 'funds';
   const {
@@ -265,7 +268,7 @@ export function PlannerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) { return StyleSheet.create({
   content: {
     gap: spacing.lg,
     paddingBottom: spacing.xxl,
@@ -333,4 +336,4 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     padding: spacing.md,
   },
-});
+}); }

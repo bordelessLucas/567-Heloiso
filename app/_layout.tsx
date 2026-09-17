@@ -12,7 +12,9 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/src/contexts/AuthContext';
-import { colors } from '@/src/theme/tokens';
+import { ThemeProvider } from '@/src/contexts/ThemeContext';
+import { OnboardingProvider } from '@/src/contexts/OnboardingContext';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -37,9 +39,20 @@ export default function RootLayout() {
   }
 
   return (
+    <ThemeProvider>
+      <ThemedRootNavigation />
+    </ThemeProvider>
+  );
+}
+
+function ThemedRootNavigation() {
+  const { colors, resolvedTheme } = useAppTheme();
+
+  return (
     <AuthProvider>
-      <StatusBar style="dark" />
-      <Stack
+      <OnboardingProvider>
+        <StatusBar style={resolvedTheme === 'dark' ? 'light' : 'dark'} />
+        <Stack
         screenOptions={{
           headerShown: false,
           contentStyle: { backgroundColor: colors.background },
@@ -49,8 +62,10 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="index" />
+        <Stack.Screen name="onboarding" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="learn/[moduleId]" />
         <Stack.Screen name="rankings" />
         <Stack.Screen name="news" />
         <Stack.Screen name="profile" />
@@ -59,7 +74,8 @@ export default function RootLayout() {
         <Stack.Screen name="fund/[ticker]" />
         <Stack.Screen name="holding/[ticker]" />
         <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: true }} />
-      </Stack>
+        </Stack>
+      </OnboardingProvider>
     </AuthProvider>
   );
 }

@@ -18,7 +18,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { colors, spacing } from '@/src/theme/tokens';
+import { spacing } from '@/src/theme/tokens';
+import { useAppTheme } from '@/src/hooks/useAppTheme';
 
 export interface ContainerProps {
   children: ReactNode;
@@ -38,6 +39,7 @@ export function Container({
   style,
   contentStyle,
 }: ContainerProps) {
+  const { colors } = useAppTheme();
   const insets = useSafeAreaInsets();
   const topFade = useSharedValue(0);
   const [pulling, setPulling] = useState(false);
@@ -105,7 +107,7 @@ export function Container({
       {pulling ? (
         <View
           pointerEvents="none"
-          style={[styles.topMask, { height: insets.top }]}
+          style={[styles.topMask, { height: insets.top, backgroundColor: colors.background }]}
         />
       ) : null}
     </View>
@@ -125,7 +127,10 @@ export function Container({
   );
 
   return (
-    <SafeAreaView edges={[...edges]} style={[styles.safe, style]}>
+    <SafeAreaView
+      edges={[...edges]}
+      style={[styles.safe, { backgroundColor: colors.background }, style]}
+    >
       {maybeKeyboard}
     </SafeAreaView>
   );
@@ -134,7 +139,6 @@ export function Container({
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background,
     overflow: 'hidden',
   },
   flex: {
@@ -158,7 +162,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: colors.background,
     zIndex: 5,
   },
 });
