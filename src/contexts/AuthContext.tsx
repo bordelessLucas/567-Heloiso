@@ -8,7 +8,11 @@ import {
   type ReactNode,
 } from 'react';
 
-import type { UserProfile } from '@/src/domain/user';
+import type {
+  InvestorSensitiveProfile,
+  UpdateInvestorSensitiveProfileInput,
+  UserProfile,
+} from '@/src/domain/user';
 import {
   AuthUser,
   getCurrentUser,
@@ -21,18 +25,26 @@ import {
 } from '@/src/services/auth.service';
 import {
   createUserProfile,
+  getInvestorSensitiveProfile,
   getUserProfile,
+  updateInvestorSensitiveProfile,
+  updateUserProfile,
 } from '@/src/services/user.service';
 
 interface AuthContextValue {
   user: AuthUser | null;
   profile: UserProfile | null;
+  sensitiveProfile: InvestorSensitiveProfile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  updateProfile: (
+    data: Partial<Pick<UserProfile, 'displayName' | 'investorProfile'>>,
+  ) => Promise<void>;
+  updateSensitiveProfile: (data: UpdateInvestorSensitiveProfileInput) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -44,6 +56,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(getCurrentUser());
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [sensitiveProfile, setSensitiveProfile] = useState<InvestorSensitiveProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -52,16 +65,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (!nextUser) {
         setProfile(null);
+        setSensitiveProfile(null);
         setIsLoading(false);
         return;
       }
 
-      void getUserProfile(nextUser.uid)
-        .then((nextProfile) => {
+      void Promise.all([
+        getUserProfile(nextUser.uid),
+        getInvestorSensitiveProfile(nextUser.uid),
+      ])
+        .then(([nextProfile, nextSensitiveProfile]) => {
           setProfile(nextProfile);
+          setSensitiveProfile(nextSensitiveProfile);
         })
         .catch(() => {
           setProfile(null);
+          setSensitiveProfile(null);
         })
         .finally(() => {
           setIsLoading(false);
@@ -99,18 +118,63 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await sendPasswordReset(email.trim().toLowerCase());
   }, []);
 
+  const updateProfile = useCallback(
+    async (data: Partial<Pick<UserProfile, 'displayName' | 'investorProfile'>>) => {
+      if (!user) {
+        throw new Error('No authenticated user to update.');
+      }
+
+      if (typeof data.displayName === 'string') {
+        await updateAuthDisplayName(data.displayName);
+      }
+
+      await updateUserProfile(user.uid, data);
+      const refreshed = await getUserProfile(user.uid);
+      setProfile(refreshed);
+      setUser(getCurrentUser());
+    },
+    [user],
+  );
+
+  const updateSensitiveProfile = useCallback(
+    async (data: UpdateInvestorSensitiveProfileInput) => {
+      if (!user) {
+        throw new Error('No authenticated user to update.');
+      }
+
+      await updateInvestorSensitiveProfile(user.uid, data);
+      const refreshed = await getInvestorSensitiveProfile(user.uid);
+      setSensitiveProfile(refreshed);
+    },
+    [user],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       profile,
+      sensitiveProfile,
       isLoading,
       isAuthenticated: user !== null,
       signIn,
       signUp,
       signOut,
       resetPassword,
+      updateProfile,
+      updateSensitiveProfile,
     }),
-    [user, profile, isLoading, signIn, signUp, signOut, resetPassword],
+    [
+      user,
+      profile,
+      sensitiveProfile,
+      isLoading,
+      signIn,
+      signUp,
+      signOut,
+      resetPassword,
+      updateProfile,
+      updateSensitiveProfile,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

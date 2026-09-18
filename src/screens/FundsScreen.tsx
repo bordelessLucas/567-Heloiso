@@ -108,14 +108,14 @@ export function FundsScreen() {
           <View style={styles.stateCard}>
             <ActivityIndicator color={colors.primary} />
             <Typography variant="caption" color={colors.textMuted}>
-              Carregando snapshot...
+              Carregando dados de mercado...
             </Typography>
           </View>
         ) : list.length === 0 ? (
           <View style={styles.stateCard}>
             <Typography variant="h3">Nenhum FII encontrado</Typography>
             <Typography variant="body" color={colors.textMuted}>
-              Ajuste a busca ou o segmento. O snapshot mock tem poucos fundos no MVP.
+              Ajuste a busca ou o segmento. A base inicial ainda e controlada no MVP.
             </Typography>
             <Pressable
               style={styles.clearBtn}

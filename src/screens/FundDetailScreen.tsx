@@ -61,7 +61,10 @@ export function FundDetailScreen() {
         <Typography variant="display">{formatBrl(fund.sharePrice)}</Typography>
         <ChangeBadge value={fund.changePercent} />
         <Typography variant="caption" color={colors.textMuted}>
-          Snapshot mock — não atualiza em tempo real no MVP
+          Ultima atualizacao: {fund.updatedAt ?? 'Nao disponivel'}
+        </Typography>
+        <Typography variant="caption" color={colors.textMuted}>
+          {fund.sourceNote ?? 'Dados de mercado sujeitos ao atraso da fonte.'}
         </Typography>
       </View>
 
@@ -90,6 +93,24 @@ export function FundDetailScreen() {
             <Metric label="P/VP" value={formatRatio(fund.pvp)} />
             <Metric label="PL" value={formatCompactBrl(fund.netWorth)} />
             <Metric label="Liquidez" value={formatCompactBrl(fund.liquidity)} />
+            <Metric label="Abertura" value={formatBrl(fund.open)} />
+            <Metric label="Maxima" value={formatBrl(fund.high)} />
+            <Metric label="Minima" value={formatBrl(fund.low)} />
+            <Metric label="Fech. anterior" value={formatBrl(fund.previousClose)} />
+            <Metric label="VP/cota" value={formatBrl(fund.equityPerShare)} />
+            <Metric label="Dividendos 12m" value={formatBrl(fund.dividends12m)} />
+          </View>
+          <View style={styles.card}>
+            <Typography variant="h3">Dados cadastrais</Typography>
+            <Typography variant="caption" color={colors.textMuted}>
+              Razao social: {fund.companyName ?? 'Nao disponivel'}
+            </Typography>
+            <Typography variant="caption" color={colors.textMuted}>
+              CNPJ: {fund.cnpj ?? 'Nao disponivel'}
+            </Typography>
+            <Typography variant="caption" color={colors.textMuted}>
+              Numero de cotas: {fund.quotaCount?.toLocaleString('pt-BR') ?? 'Nao disponivel'}
+            </Typography>
           </View>
           <View style={styles.card}>
             <Typography variant="h3">FII × Tesouro IPCA+</Typography>
@@ -188,6 +209,17 @@ export function FundDetailScreen() {
 
       {tab === 'docs' ? (
         <View style={styles.block}>
+          {fund.dividendsHistory && fund.dividendsHistory.length > 0 ? (
+            <View style={styles.card}>
+              <Typography variant="h3">Proventos HG Brasil</Typography>
+              {fund.dividendsHistory.slice(0, 6).map((event) => (
+                <Typography key={event.id} variant="caption" color={colors.textMuted}>
+                  {event.label}: {formatBrl(event.amount)} · com {event.comDate ?? 'N/D'} · pagamento{' '}
+                  {event.paymentDate ?? 'N/D'}
+                </Typography>
+              ))}
+            </View>
+          ) : null}
           {fund.documents.length === 0 ? (
             <Typography variant="body" color={colors.textMuted}>
               Sem documentos no snapshot mock deste fundo.

@@ -7,7 +7,7 @@ import { Typography } from '@/src/components/Typography';
 import type { FundSummary } from '@/src/domain/fund';
 import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
 import { useAppTheme } from '@/src/hooks/useAppTheme';
-import { formatBrl } from '@/src/utils/format';
+import { formatBrl, formatPercent, formatRatio } from '@/src/utils/format';
 
 interface FundListItemProps {
   fund: FundSummary;
@@ -29,6 +29,9 @@ export function FundListItem({ fund, onPress }: FundListItemProps) {
         </Typography>
         <Typography variant="caption" color={colors.textMuted} numberOfLines={1}>
           {fund.name}
+        </Typography>
+        <Typography variant="caption" color={colors.textMuted} numberOfLines={1}>
+          DY {formatPercent(fund.dividendYield)} · P/VP {formatRatio(fund.pvp)}
         </Typography>
       </View>
 
