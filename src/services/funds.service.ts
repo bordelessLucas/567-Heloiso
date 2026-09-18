@@ -2,6 +2,7 @@ import type { FundProfile, FundSegment, FundSummary } from '@/src/domain/fund';
 import type { RankingBoard, RankingMetric } from '@/src/domain/ranking';
 import { toTesouroComparisonView } from '@/src/domain/fundsTools';
 import { MOCK_FUNDS, toFundSummary } from '@/src/data/mocks/funds.mock';
+import { hgBrasilProvider, type MarketFiiQuote } from '@/src/services/market-data';
 import { formatCompactBrl, formatPercent, formatRatio } from '@/src/utils/format';
 
 function formatMetric(metric: RankingMetric, value: number | null): string {
@@ -12,10 +13,77 @@ function formatMetric(metric: RankingMetric, value: number | null): string {
   return formatCompactBrl(value);
 }
 
+function mergeSummaryWithQuote(summary: FundSummary, quote?: MarketFiiQuote | null): FundSummary {
+  if (!quote) return { ...summary, dataSource: 'mock', sourceNote: 'Dados de mercado em mock.' };
+
+  return {
+    ...summary,
+    name: quote.name ?? summary.name,
+    companyName: quote.companyName,
+    cnpj: quote.cnpj,
+    sharePrice: quote.price ?? summary.sharePrice,
+    changeValue: quote.changeValue,
+    changePercent: quote.changePercent ?? summary.changePercent,
+    open: quote.open,
+    high: quote.high,
+    low: quote.low,
+    previousClose: quote.previousClose,
+    marketClose: quote.close,
+    marketCap: quote.marketCap,
+    dividendYield: quote.dividendYield12m ?? summary.dividendYield,
+    dividends12m: quote.dividends12m,
+    pvp: quote.priceToBook ?? summary.pvp,
+    netWorth: quote.equity ?? summary.netWorth,
+    quotaCount: quote.quotaCount,
+    equityPerShare: quote.equityPerShare,
+    liquidity: quote.volume ?? summary.liquidity,
+    updatedAt: quote.updatedAt ?? summary.updatedAt,
+    dataSource: 'mixed',
+    stale: quote.stale,
+    sourceNote: quote.stale
+      ? 'Dados HG Brasil em cache; podem estar desatualizados.'
+      : 'Cotacao e indicadores de mercado via HG Brasil. Dados operacionais podem vir do snapshot mock.',
+  };
+}
+
+function refreshIndicators(profile: FundProfile): FundProfile {
+  return {
+    ...profile,
+    indicators: profile.indicators.map((indicator) => {
+      if (indicator.key === 'pvp') return { ...indicator, value: profile.pvp };
+      if (indicator.key === 'dividend_yield') return { ...indicator, value: profile.dividendYield };
+      if (indicator.key === 'net_worth') return { ...indicator, value: profile.netWorth };
+      if (indicator.key === 'liquidity') return { ...indicator, value: profile.liquidity };
+      return indicator;
+    }),
+    tesouroIpcaComparison: {
+      ...profile.tesouroIpcaComparison,
+      fundDy12m: profile.dividendYield,
+      premiumPercent:
+        profile.dividendYield !== null
+          ? Number((profile.dividendYield - profile.tesouroIpcaComparison.tesouroRate).toFixed(2))
+          : null,
+    },
+  };
+}
+
+function mergeProfileWithQuote(profile: FundProfile, quote?: MarketFiiQuote | null): FundProfile {
+  const summary = mergeSummaryWithQuote(toFundSummary(profile), quote);
+  return refreshIndicators({
+    ...profile,
+    ...summary,
+  });
+}
+
+async function enrichSummariesWithMarketData(summaries: FundSummary[]): Promise<FundSummary[]> {
+  const quotes = await hgBrasilProvider.getFiiQuotes(summaries.map((fund) => fund.ticker));
+  return summaries.map((summary) => mergeSummaryWithQuote(summary, quotes.get(summary.ticker)));
+}
+
 export async function listFunds(query?: string, segment?: FundSegment | 'all'): Promise<FundSummary[]> {
   const normalized = query?.trim().toLowerCase() ?? '';
 
-  return MOCK_FUNDS.filter((fund) => {
+  const filtered = MOCK_FUNDS.filter((fund) => {
     const matchesSegment =
       !segment ||
       segment === 'all' ||
@@ -34,17 +102,26 @@ export async function listFunds(query?: string, segment?: FundSegment | 'all'): 
 
     return matchesSegment && matchesQuery;
   }).map(toFundSummary);
+
+  return enrichSummariesWithMarketData(filtered);
 }
 
 export async function listPopularFunds(): Promise<FundSummary[]> {
-  return MOCK_FUNDS.filter((fund) => fund.popular).map(toFundSummary);
+  return enrichSummariesWithMarketData(MOCK_FUNDS.filter((fund) => fund.popular).map(toFundSummary));
 }
 
 export async function getFundByTicker(ticker: string): Promise<FundProfile | null> {
   const found = MOCK_FUNDS.find(
     (fund) => fund.ticker.toLowerCase() === ticker.trim().toLowerCase(),
   );
-  return found ?? null;
+  if (!found) return null;
+
+  const details = await hgBrasilProvider.getFiiDetails(found.ticker);
+  const merged = mergeProfileWithQuote(found, details);
+  return {
+    ...merged,
+    dividendsHistory: details?.dividendsHistory ?? found.dividendsHistory ?? [],
+  };
 }
 
 export async function listRankingBoards(): Promise<RankingBoard[]> {
@@ -54,10 +131,11 @@ export async function listRankingBoards(): Promise<RankingBoard[]> {
     { id: 'pl', title: 'Maior Patrimônio', metric: 'net_worth' },
     { id: 'pvp', title: 'Menor P/VP', metric: 'pvp' },
   ];
+  const enriched = await enrichSummariesWithMarketData(MOCK_FUNDS.map(toFundSummary));
 
   return boards.map((board) => {
-    const sorted = [...MOCK_FUNDS].sort((a, b) => {
-      const pick = (fund: FundProfile): number => {
+    const sorted = [...enriched].sort((a, b) => {
+      const pick = (fund: FundSummary): number => {
         if (board.metric === 'dividend_yield') return fund.dividendYield ?? 0;
         if (board.metric === 'liquidity') return fund.liquidity ?? 0;
         if (board.metric === 'net_worth') return fund.netWorth ?? 0;
@@ -103,13 +181,8 @@ export async function listFundsByRankingMetric(
 ): Promise<FundSummary[]> {
   const segment = options?.segment ?? 'all';
   const filtered = await listFunds(undefined, segment);
-
-  const profiles = filtered
-    .map((summary) => MOCK_FUNDS.find((fund) => fund.id === summary.id))
-    .filter((fund): fund is FundProfile => Boolean(fund));
-
-  const sorted = [...profiles].sort((a, b) => {
-    const pick = (fund: FundProfile): number => {
+  const sorted = [...filtered].sort((a, b) => {
+    const pick = (fund: FundSummary): number => {
       if (metric === 'dividend_yield') return fund.dividendYield ?? -1;
       if (metric === 'liquidity') return fund.liquidity ?? -1;
       if (metric === 'net_worth') return fund.netWorth ?? -1;
@@ -121,7 +194,7 @@ export async function listFundsByRankingMetric(
   });
 
   const limit = options?.limit ?? sorted.length;
-  return sorted.slice(0, limit).map(toFundSummary);
+  return sorted.slice(0, limit);
 }
 
 export async function getTesouroComparison(ticker: string) {

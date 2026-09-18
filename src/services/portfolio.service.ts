@@ -16,6 +16,7 @@ import {
 } from '@/src/data/mocks/portfolio.store';
 import { MOCK_FUNDS } from '@/src/data/mocks/funds.mock';
 import { FUND_SEGMENT_LABELS } from '@/src/domain/fund';
+import { getFundByTicker } from '@/src/services/funds.service';
 import { todayKey } from '@/src/utils/format';
 
 export interface PortfolioPositionView extends PortfolioHolding {
@@ -52,9 +53,10 @@ export interface HoldingDetailView {
   trades: PortfolioTrade[];
 }
 
-function enrichHolding(holding: PortfolioHolding): PortfolioPositionView {
+async function enrichHolding(holding: PortfolioHolding): Promise<PortfolioPositionView> {
   const fund = resolveFundMeta(holding.ticker);
-  const currentPrice = fund?.sharePrice ?? null;
+  const marketFund = await getFundByTicker(holding.ticker);
+  const currentPrice = marketFund?.sharePrice ?? fund?.sharePrice ?? null;
   const marketValue =
     currentPrice !== null ? currentPrice * holding.quantity : holding.investedAmount;
   const pnlAmount = marketValue - holding.investedAmount;
@@ -63,9 +65,9 @@ function enrichHolding(holding: PortfolioHolding): PortfolioPositionView {
 
   return {
     ...holding,
-    name: fund?.name ?? holding.ticker,
+    name: marketFund?.name ?? fund?.name ?? holding.ticker,
     currentPrice,
-    changePercent: fund?.changePercent ?? null,
+    changePercent: marketFund?.changePercent ?? fund?.changePercent ?? null,
     marketValue,
     pnlAmount,
     pnlPercent,
@@ -198,8 +200,9 @@ export async function getPortfolioDashboard(
   options?: { sort?: PortfolioSortKey; chartDays?: HistoryPeriodDays },
 ): Promise<PortfolioDashboard> {
   const summary = await getPortfolioSummary(userId, email);
+  const enriched = await Promise.all(summary.holdings.map(enrichHolding));
   const positions = sortPositions(
-    summary.holdings.map(enrichHolding),
+    enriched,
     options?.sort ?? 'default',
   );
   const totalMarketValue = positions.reduce((acc, item) => acc + item.marketValue, 0);
@@ -262,7 +265,7 @@ export async function getHoldingDetail(
   const holding = holdings.find((item) => item.ticker.toUpperCase() === ticker.toUpperCase());
   if (!holding) return null;
 
-  const position = enrichHolding(holding);
+  const position = await enrichHolding(holding);
   const price = position.currentPrice ?? position.averagePrice;
   const chartDays = options?.chartDays ?? 30;
 
@@ -294,11 +297,13 @@ export async function executeTrade(input: ExecuteTradeInput): Promise<PortfolioP
   }
 
   const fund = resolveFundMeta(input.ticker);
-  if (!fund || fund.sharePrice == null) {
+  const marketFund = await getFundByTicker(input.ticker);
+  const currentPrice = marketFund?.sharePrice ?? fund?.sharePrice ?? null;
+  if (!fund || currentPrice == null) {
     throw new Error('Cotação indisponível para este ativo.');
   }
 
-  const price = input.price ?? fund.sharePrice;
+  const price = input.price ?? currentPrice;
   const holdings = readHoldings(input.userId, input.email);
   const index = holdings.findIndex(
     (item) => item.ticker.toUpperCase() === input.ticker.toUpperCase(),
