@@ -8,5 +8,7 @@ export { PlannerScreen } from '@/src/screens/PlannerScreen';
 export { LearningScreen } from '@/src/screens/LearningScreen';
 export { RankingsScreen } from '@/src/screens/RankingsScreen';
 export { TesouroCompareScreen } from '@/src/screens/TesouroCompareScreen';
+export { PouparScreen } from '@/src/screens/PouparScreen';
+export { AdminUsersScreen } from '@/src/screens/AdminUsersScreen';
 export { NewsScreen } from '@/src/screens/NewsScreen';
 export { ProfileScreen } from '@/src/screens/ProfileScreen';

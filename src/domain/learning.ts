@@ -8,6 +8,7 @@ export type LearningTrackId =
   | 'what-is-fii'
   | 'define-objective'
   | 'choose-broker'
+  | 'first-buy-bank'
   | 'analyse-fund'
   | 'diversify'
   | 'buy-and-reinvest'

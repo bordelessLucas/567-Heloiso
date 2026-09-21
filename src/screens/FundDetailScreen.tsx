@@ -4,6 +4,7 @@ import { router, useLocalSearchParams, type Href } from 'expo-router';
 
 import { Container, ScreenHeader, Typography } from '@/src/components';
 import { ChangeBadge } from '@/src/components/ChangeBadge';
+import { FundCompositionCharts } from '@/src/components/FundCompositionCharts';
 import { FUND_SEGMENT_LABELS } from '@/src/domain/fund';
 import { useFundDetail } from '@/src/hooks/useFundDetail';
 import { colors, radii, shadows, spacing, type AppColors } from '@/src/theme/tokens';
@@ -161,19 +162,11 @@ export function FundDetailScreen() {
 
       {tab === 'portfolio' ? (
         <View style={styles.block}>
-          {fund.allocations.map((item) => (
-            <View key={item.label} style={styles.allocRow}>
-              <View style={styles.allocMeta}>
-                <Typography variant="bodyStrong">{item.label}</Typography>
-                {item.region ? (
-                  <Typography variant="caption" color={colors.textMuted}>
-                    {item.region}
-                  </Typography>
-                ) : null}
-              </View>
-              <Typography variant="bodyStrong">{formatPercent(item.sharePercent, 0)}</Typography>
-            </View>
-          ))}
+          <Typography variant="h3">Composição da carteira do fundo</Typography>
+          <Typography variant="caption" color={colors.textMuted}>
+            Snapshot mock — gráfico por ativo e por geografia para leitura didática.
+          </Typography>
+          <FundCompositionCharts allocations={fund.allocations} />
         </View>
       ) : null}
 

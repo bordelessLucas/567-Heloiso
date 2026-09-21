@@ -46,7 +46,7 @@ export function ModuleIcon({ name, size = 22, tone = 'yellow' }: ModuleIconProps
     tone === 'yellow'
       ? { bg: colors.primary, icon: colors.black }
       : tone === 'light'
-        ? { bg: '#FFF8E6', icon: colors.primaryDark }
+        ? { bg: colors.surfaceWarm, icon: colors.primaryDark }
         : { bg: colors.black, icon: colors.primary };
 
   return (

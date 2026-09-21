@@ -37,14 +37,17 @@ const GAP_DEG = 2.2;
 const LEGEND_SLIDE_HEIGHT = 188;
 
 export interface AllocationSlice {
-  ticker: string;
-  name: string;
+  id: string;
+  title: string;
+  subtitle: string;
   color: string;
   weight: number;
   marketValue: number;
   changePercent: number | null;
-  quantity: number;
+  metaLabel: string;
 }
+
+export type AllocationGroupBy = 'ticker' | 'segment';
 
 interface AllocationRingProps {
   positions: PortfolioPositionView[];
@@ -53,6 +56,8 @@ interface AllocationRingProps {
   /** `hero` = Home (mais respirado). `compact` = Carteira. */
   variant?: 'hero' | 'compact';
   title?: string;
+  /** Agrupa o anel por ativo ou por segmento do FII. */
+  groupBy?: AllocationGroupBy;
 }
 
 function polar(cx: number, cy: number, r: number, angleDeg: number) {
@@ -99,14 +104,60 @@ export function buildAllocationSlices(
   return [...positions]
     .sort((a, b) => b.marketValue - a.marketValue)
     .map((position, index) => ({
-      ticker: position.ticker,
-      name: position.name,
+      id: position.ticker,
+      title: position.ticker,
+      subtitle: position.name,
       color: SEGMENT_COLORS[index % SEGMENT_COLORS.length] ?? colors.primary,
       weight: position.marketValue / total,
       marketValue: position.marketValue,
       changePercent: position.changePercent,
-      quantity: position.quantity,
+      metaLabel: `${position.quantity} cotas`,
     }));
+}
+
+export function buildSegmentAllocationSlices(
+  positions: PortfolioPositionView[],
+): AllocationSlice[] {
+  const total = positions.reduce((acc, item) => acc + item.marketValue, 0);
+  if (total <= 0) return [];
+
+  const map = new Map<
+    string,
+    {
+      title: string;
+      marketValue: number;
+      changeAmount: number;
+      holdingsCount: number;
+    }
+  >();
+
+  positions.forEach((position) => {
+    const key = position.segment;
+    const current = map.get(key) ?? {
+      title: position.segmentLabel,
+      marketValue: 0,
+      changeAmount: 0,
+      holdingsCount: 0,
+    };
+    current.marketValue += position.marketValue;
+    current.changeAmount += position.marketValue * ((position.changePercent ?? 0) / 100);
+    current.holdingsCount += 1;
+    map.set(key, current);
+  });
+
+  return [...map.entries()]
+    .map(([id, data], index) => ({
+      id,
+      title: data.title,
+      subtitle: `${data.holdingsCount} ativo${data.holdingsCount === 1 ? '' : 's'}`,
+      color: SEGMENT_COLORS[index % SEGMENT_COLORS.length] ?? colors.primary,
+      weight: data.marketValue / total,
+      marketValue: data.marketValue,
+      changePercent:
+        data.marketValue > 0 ? (data.changeAmount / data.marketValue) * 100 : null,
+      metaLabel: formatPercent(data.marketValue / total * 100, 0),
+    }))
+    .sort((a, b) => b.marketValue - a.marketValue);
 }
 
 export function AllocationRing({
@@ -115,13 +166,20 @@ export function AllocationRing({
   onPress,
   variant = 'hero',
   title = 'Sua carteira agora',
+  groupBy = 'ticker',
 }: AllocationRingProps) {
   const { colors } = useAppTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [selected, setSelected] = useState<string | null>(null);
   const appear = useSharedValue(0);
 
-  const slices = useMemo(() => buildAllocationSlices(positions), [positions]);
+  const slices = useMemo(
+    () =>
+      groupBy === 'segment'
+        ? buildSegmentAllocationSlices(positions)
+        : buildAllocationSlices(positions),
+    [positions, groupBy],
+  );
   const totalValue = useMemo(
     () => positions.reduce((acc, item) => acc + item.marketValue, 0),
     [positions],
@@ -145,7 +203,7 @@ export function AllocationRing({
     appear.value = 0;
     appear.value = withDelay(80, withTiming(1, { duration: 520 }));
     setSelected(null);
-  }, [positions, appear]);
+  }, [positions, groupBy, appear]);
 
   const ringStyle = useAnimatedStyle(() => ({
     opacity: appear.value,
@@ -165,7 +223,7 @@ export function AllocationRing({
     const start = angle + GAP_DEG / 2;
     const end = start + sweep;
     angle += sweep + GAP_DEG;
-    const isActive = selected === slice.ticker;
+    const isActive = selected === slice.id;
     const grow = isActive ? 4 : 0;
     return {
       ...slice,
@@ -175,17 +233,17 @@ export function AllocationRing({
   });
 
   const activeSlice = selected
-    ? slices.find((slice) => slice.ticker === selected) ?? null
+    ? slices.find((slice) => slice.id === selected) ?? null
     : null;
   const positive = daily.percent >= 0;
   const edgeColor = isHero ? colors.surfaceFeature : colors.surfaceElevated;
 
-  const selectSlice = (ticker: string) => {
+  const selectSlice = (id: string) => {
     LayoutAnimation.configureNext({
       duration: 220,
       update: { type: LayoutAnimation.Types.easeInEaseOut },
     });
-    setSelected((current) => (current === ticker ? null : ticker));
+    setSelected((current) => (current === id ? null : id));
   };
 
   return (
@@ -214,7 +272,9 @@ export function AllocationRing({
         style={({ pressed }) => [styles.valueBlock, pressed && onPress && styles.pressed]}
       >
         <Typography variant="caption" color={colors.textMuted}>
-          Composição · valor de mercado
+          {groupBy === 'segment'
+            ? 'Composição por segmento · valor de mercado'
+            : 'Composição · valor de mercado'}
         </Typography>
         <Typography variant="h2" color={colors.black} numberOfLines={1}>
           {formatBrl(totalValue)}
@@ -236,7 +296,7 @@ export function AllocationRing({
               {arcs.map((arc) =>
                 arc.d ? (
                   <Path
-                    key={arc.ticker}
+                    key={arc.id}
                     d={arc.d}
                     fill={arc.color}
                     opacity={selected && !arc.isActive ? 0.28 : 1}
@@ -258,7 +318,7 @@ export function AllocationRing({
             {activeSlice ? (
               <>
                 <Typography variant="caption" color={colors.textMuted} numberOfLines={1}>
-                  {activeSlice.ticker}
+                  {activeSlice.title}
                 </Typography>
                 <Typography variant="h3" color={colors.black} numberOfLines={1}>
                   {formatPercent(activeSlice.weight * 100, 0)}
@@ -296,7 +356,7 @@ export function AllocationRing({
 
       <View style={styles.slideHeader}>
         <Typography variant="label" color={colors.black}>
-          Suas cotas
+          {groupBy === 'segment' ? 'Por segmento' : 'Suas cotas'}
         </Typography>
         <Typography variant="caption" color={colors.textMuted}>
           Deslize para ver todas
@@ -310,12 +370,12 @@ export function AllocationRing({
         contentContainerStyle={styles.legendContent}
       >
         {slices.map((slice) => {
-          const active = selected === slice.ticker;
+          const active = selected === slice.id;
           const sliceUp = (slice.changePercent ?? 0) >= 0;
           return (
             <Pressable
-              key={slice.ticker}
-              onPress={() => selectSlice(slice.ticker)}
+              key={slice.id}
+              onPress={() => selectSlice(slice.id)}
               style={({ pressed }) => [
                 styles.legendItem,
                 isHero && styles.legendItemHero,
@@ -326,13 +386,13 @@ export function AllocationRing({
               <View style={[styles.dot, { backgroundColor: slice.color }]} />
               <View style={styles.legendMeta}>
                 <Typography variant="label" color={colors.black} numberOfLines={1}>
-                  {slice.ticker}
+                  {slice.title}
                 </Typography>
                 <Typography variant="caption" color={colors.textMuted} numberOfLines={1}>
-                  {slice.name}
+                  {slice.subtitle}
                 </Typography>
                 <Typography variant="caption" color={colors.textMuted} numberOfLines={1}>
-                  {slice.quantity} cotas · {formatPercent(slice.weight * 100, 0)}
+                  {slice.metaLabel} · {formatPercent(slice.weight * 100, 0)}
                 </Typography>
               </View>
               <Typography

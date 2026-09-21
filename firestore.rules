@@ -47,6 +47,16 @@ service cloud.firestore {
         allow read: if isSelf(userId) || isAdminOrReadonly();
         allow write: if isSelf(userId) || isAdmin();
       }
+
+      match /savingRules/{ruleId} {
+        allow read: if isSelf(userId) || isAdminOrReadonly();
+        allow write: if isSelf(userId);
+      }
+
+      match /savingEvents/{eventId} {
+        allow read: if isSelf(userId) || isAdminOrReadonly();
+        allow write: if isSelf(userId);
+      }
     }
 
     match /funds/{fundId} {

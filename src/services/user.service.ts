@@ -62,13 +62,24 @@ function mapInvestorSensitiveProfile(data: Record<string, unknown>): InvestorSen
     data.investmentGoal === 'income' ||
     data.investmentGoal === 'growth' ||
     data.investmentGoal === 'preservation' ||
-    data.investmentGoal === 'learning'
+    data.investmentGoal === 'learning' ||
+    data.investmentGoal === 'retirement' ||
+    data.investmentGoal === 'wealth' ||
+    data.investmentGoal === 'property' ||
+    data.investmentGoal === 'other'
       ? data.investmentGoal
       : null;
   const investmentHorizon =
     data.investmentHorizon === 'short' ||
     data.investmentHorizon === 'medium' ||
-    data.investmentHorizon === 'long'
+    data.investmentHorizon === 'long' ||
+    data.investmentHorizon === 'y2' ||
+    data.investmentHorizon === 'y5' ||
+    data.investmentHorizon === 'y10' ||
+    data.investmentHorizon === 'y15' ||
+    data.investmentHorizon === 'y20' ||
+    data.investmentHorizon === 'y25' ||
+    data.investmentHorizon === 'more'
       ? data.investmentHorizon
       : null;
 

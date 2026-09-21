@@ -9,6 +9,7 @@ export type AppModuleId =
   | 'portfolio'
   | 'learn'
   | 'planner'
+  | 'poupar'
   | 'rankings'
   | 'news'
   | 'profile';
@@ -68,6 +69,15 @@ export const APP_MODULES: AppModule[] = [
     inTabs: false,
     homeShortcut: false,
     previewHint: 'Sequência e meta diária',
+  },
+  {
+    id: 'poupar',
+    title: 'Poupar',
+    description: 'Gasto evitado → cotas equivalentes (educativo)',
+    href: '/tools/poupar',
+    inTabs: false,
+    homeShortcut: true,
+    previewHint: 'Associação gasto → FII',
   },
   {
     id: 'rankings',

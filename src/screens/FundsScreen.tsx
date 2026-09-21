@@ -57,6 +57,13 @@ export function FundsScreen() {
       icon: 'funds',
     },
     {
+      id: 'poupar',
+      title: 'Poupar em vez de gastar',
+      detail: 'Associe um gasto a um FII e veja cotas equivalentes ao poupar.',
+      href: '/tools/poupar',
+      icon: 'savings',
+    },
+    {
       id: 'rankings',
       title: 'Rankings',
       detail: 'Ordene por DY, liquidez, PL ou P/VP com contexto didático.',
