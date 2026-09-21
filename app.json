@@ -41,6 +41,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8184d794-a9c7-48ca-b3ae-b72d763086ae"
+      }
+    },
+    "owner": "borderlesspc12"
   }
 }
