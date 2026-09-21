@@ -13,6 +13,7 @@ import type {
   UpdateInvestorSensitiveProfileInput,
   UserProfile,
 } from '@/src/domain/user';
+import { MARKET_DEMO_EMAIL } from '@/src/data/mocks/demo.account';
 import {
   AuthUser,
   getCurrentUser,
@@ -48,6 +49,7 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const MARKET_DEMO_DISPLAY_NAME = 'Mercado FiiS';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -91,7 +93,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    await signInWithEmail(email, password);
+    const normalizedEmail = email.trim().toLowerCase();
+    const credential = await signInWithEmail(normalizedEmail, password);
+
+    if (normalizedEmail !== MARKET_DEMO_EMAIL) {
+      return;
+    }
+
+    const existingProfile = await getUserProfile(credential.user.uid);
+
+    if (existingProfile) {
+      setProfile(existingProfile);
+      return;
+    }
+
+    await updateAuthDisplayName(MARKET_DEMO_DISPLAY_NAME);
+    const created = await createUserProfile({
+      id: credential.user.uid,
+      email: credential.user.email ?? normalizedEmail,
+      displayName: MARKET_DEMO_DISPLAY_NAME,
+    });
+    setProfile(created);
   }, []);
 
   const signUp = useCallback(

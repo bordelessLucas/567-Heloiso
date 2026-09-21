@@ -4,9 +4,11 @@ import { todayKey } from '@/src/utils/format';
 
 /** Conta demo para validar o MVP com dados preenchidos. */
 export const DEMO_EMAIL = 'lorenzo@gmail.com';
+export const MARKET_DEMO_EMAIL = 'mercado@fiis.com';
 
 export function isDemoAccount(email: string | null | undefined): boolean {
-  return (email ?? '').trim().toLowerCase() === DEMO_EMAIL;
+  const normalizedEmail = (email ?? '').trim().toLowerCase();
+  return normalizedEmail === DEMO_EMAIL || normalizedEmail === MARKET_DEMO_EMAIL;
 }
 
 export interface FundRecommendation {
