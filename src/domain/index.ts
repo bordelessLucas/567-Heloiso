@@ -33,3 +33,5 @@ export {
 export type { TesouroComparisonView } from '@/src/domain/fundsTools';
 export type { NewsItem } from '@/src/domain/news';
 export type { InvestorProfileAnswers } from '@/src/domain/investorProfile';
+export type { SavingRule, SavingEvent, SavingSummary } from '@/src/domain/saving';
+export { SAVING_PRESET_LABELS } from '@/src/domain/saving';

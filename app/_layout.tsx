@@ -71,6 +71,8 @@ function ThemedRootNavigation() {
         <Stack.Screen name="profile" />
         <Stack.Screen name="planner" />
         <Stack.Screen name="tools/tesouro-ipca" />
+        <Stack.Screen name="tools/poupar" />
+        <Stack.Screen name="admin/users" />
         <Stack.Screen name="fund/[ticker]" />
         <Stack.Screen name="holding/[ticker]" />
         <Stack.Screen name="modal" options={{ presentation: 'modal', headerShown: true }} />

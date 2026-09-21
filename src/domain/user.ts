@@ -2,9 +2,28 @@ export type UserRole = 'investor' | 'admin' | 'admin_readonly';
 
 export type InvestorProfileType = 'conservative' | 'moderate' | 'aggressive';
 
-export type InvestorGoal = 'income' | 'growth' | 'preservation' | 'learning';
+export type InvestorGoal =
+  | 'retirement'
+  | 'wealth'
+  | 'property'
+  | 'income'
+  | 'growth'
+  | 'preservation'
+  | 'learning'
+  | 'other';
 
-export type InvestmentHorizon = 'short' | 'medium' | 'long';
+/** Horizontes alinhados à reunião (anos); legado short/medium/long ainda mapeável. */
+export type InvestmentHorizon =
+  | 'y2'
+  | 'y5'
+  | 'y10'
+  | 'y15'
+  | 'y20'
+  | 'y25'
+  | 'more'
+  | 'short'
+  | 'medium'
+  | 'long';
 
 export interface UserProfile {
   id: string;

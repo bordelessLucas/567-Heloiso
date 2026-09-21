@@ -183,8 +183,56 @@ const tracks: LearningTrack[] = [
     ],
   },
   {
-    id: 'analyse-fund',
+    id: 'first-buy-bank',
     order: 5,
+    eyebrow: 'Acesso via banco',
+    title: 'Primeiro aporte pelo app do banco',
+    description:
+      'Para quem investe pelo aplicativo do banco (ex.: Nubank, C6 e similares) — caminho parecido ao da corretora, com telas e nomes próprios de cada instituição.',
+    cover: covers.chooseBroker,
+    coverAlt: 'Arte ilustrando acesso a investimentos pelo aplicativo',
+    coverAspectRatio: 1.701,
+    mentorNote:
+      'Bancos digitais também oferecem módulo de investimentos. O fluxo muda de marca para marca — use este guia como mapa, não como tutorial de um app específico.',
+    lessons: [
+      {
+        id: 'bank-vs-broker',
+        title: 'Banco e corretora: o que muda na prática',
+        description:
+          'Em muitos bancos o investimento em FIIs acontece dentro do próprio app, com saldo da conta. A corretora costuma ter Home Broker dedicado. Em ambos os casos, a cota é negociada no ambiente da B3 — o que muda é a interface e alguns custos.',
+        items: [
+          'Confirme se o banco oferece FIIs listados (não apenas produtos exclusivos da instituição).',
+          'Compare tarifas, spread e horário de envio de ordens.',
+          'Guarde comprovantes e o ticker exato da cota.',
+        ],
+      },
+      {
+        id: 'bank-flow',
+        title: 'Passo a passo genérico no app bancário',
+        description:
+          'Os nomes dos menus variam (Investimentos, Renda variável, FIIs). Em geral: habilitar o perfil de investidor, transferir ou liberar saldo, buscar o ticker, revisar preço/quantidade e confirmar a ordem.',
+        items: [
+          'Complete o questionário de perfil do banco se solicitado (suitability).',
+          'Busque pelo ticker (ex.: HGLG11) e confira o nome do fundo.',
+          'Revise custos e só confirme se entender a ordem.',
+        ],
+      },
+      {
+        id: 'bank-care',
+        title: 'Cuidados comuns em apps de banco',
+        description:
+          'Evite confundir fundo listado com produto de crédito da própria instituição. Leia o regulamento e o relatório gerencial fora do app quando quiser aprofundar — o Mercado FiiS ajuda nessa leitura.',
+        items: [
+          'Desconfie de atalhos que prometem rentabilidade garantida.',
+          'Separe “investir no banco” de “estudar o FII” — estudo e ordem são etapas diferentes.',
+          'Se a interface não deixar claro o ticker, não avance.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'analyse-fund',
+    order: 6,
     eyebrow: 'Leitura de dados',
     title: 'Analise o fundo',
     description: 'Vá além de um dividendo alto e observe a qualidade da estratégia inteira.',
@@ -225,7 +273,7 @@ const tracks: LearningTrack[] = [
   },
   {
     id: 'diversify',
-    order: 6,
+    order: 7,
     eyebrow: 'Gestão de risco',
     title: 'Diversifique',
     description: 'Reduza a dependência de um único ativo, imóvel, locatário ou segmento.',
@@ -266,7 +314,7 @@ const tracks: LearningTrack[] = [
   },
   {
     id: 'buy-and-reinvest',
-    order: 7,
+    order: 8,
     eyebrow: 'Ciclo de investimento',
     title: 'Compre e reinvista',
     description: 'Entenda o que acontece após uma ordem e o papel dos rendimentos no longo prazo.',
@@ -302,7 +350,7 @@ const tracks: LearningTrack[] = [
   },
   {
     id: 'monitor-portfolio',
-    order: 8,
+    order: 9,
     eyebrow: 'Acompanhamento',
     title: 'Acompanhe sua carteira',
     description: 'Crie uma rotina de revisão baseada em fatos, não no ruído diário.',
@@ -342,7 +390,7 @@ const tracks: LearningTrack[] = [
   },
   {
     id: 'next-steps',
-    order: 9,
+    order: 10,
     eyebrow: 'Próximo passo',
     title: 'Você já sabe por onde começar',
     description: 'Feche a trilha com um processo simples para continuar aprendendo com autonomia.',

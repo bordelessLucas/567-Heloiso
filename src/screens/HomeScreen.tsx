@@ -58,6 +58,15 @@ export function HomeScreen() {
         detail: portfolioDetail,
       },
       {
+        id: 'poupar',
+        title: 'Poupar',
+        href: '/tools/poupar',
+        icon: 'savings' as const,
+        eyebrow: 'Em vez de gastar',
+        headline: 'Gasto evitado → cotas equivalentes',
+        detail: 'Associe café, lanche ou outro gasto a um FII — sem compra real.',
+      },
+      {
         id: 'funds',
         title: 'Fundos',
         href: '/(tabs)/funds',

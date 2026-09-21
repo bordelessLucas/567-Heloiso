@@ -20,6 +20,7 @@ export { SegmentChips } from '@/src/components/SegmentChips';
 export { StreakHero } from '@/src/components/StreakHero';
 export { ModuleIcon } from '@/src/components/ModuleIcon';
 export type { ModuleIconName } from '@/src/components/ModuleIcon';
+export { SavingCategoryIcon } from '@/src/components/SavingCategoryIcon';
 export { HomeStreakCard } from '@/src/components/HomeStreakCard';
 export { ModulePreviewCard } from '@/src/components/ModulePreviewCard';
 export type { ModulePreviewData } from '@/src/components/ModulePreviewCard';

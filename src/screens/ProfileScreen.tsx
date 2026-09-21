@@ -44,16 +44,24 @@ const INVESTOR_PROFILE_LABELS: Record<InvestorProfileType, string> = {
 };
 
 const INVESTOR_GOAL_OPTIONS: Array<{ value: InvestorGoal; label: string }> = [
-  { value: 'income', label: 'Renda' },
+  { value: 'retirement', label: 'Aposentadoria' },
+  { value: 'wealth', label: 'Construção de patrimônio' },
+  { value: 'property', label: 'Compra de imóvel' },
+  { value: 'income', label: 'Renda passiva' },
   { value: 'growth', label: 'Crescimento' },
-  { value: 'preservation', label: 'Preservacao' },
+  { value: 'preservation', label: 'Preservação' },
   { value: 'learning', label: 'Aprender' },
+  { value: 'other', label: 'Outro' },
 ];
 
 const HORIZON_OPTIONS: Array<{ value: InvestmentHorizon; label: string }> = [
-  { value: 'short', label: 'Ate 2 anos' },
-  { value: 'medium', label: '2 a 5 anos' },
-  { value: 'long', label: '5+ anos' },
+  { value: 'y2', label: '2 anos' },
+  { value: 'y5', label: '5 anos' },
+  { value: 'y10', label: '10 anos' },
+  { value: 'y15', label: '15 anos' },
+  { value: 'y20', label: '20 anos' },
+  { value: 'y25', label: '25 anos' },
+  { value: 'more', label: 'Mais / Outro' },
 ];
 
 interface ProfileScreenProps {
@@ -446,6 +454,14 @@ export function ProfileScreen({ showBack = false }: ProfileScreenProps) {
         variant="primary"
         onPress={() => router.push('/planner')}
       />
+
+      {profile?.role === 'admin' || profile?.role === 'admin_readonly' ? (
+        <Button
+          label="Painel admin · usuários"
+          variant="outline"
+          onPress={() => router.push('/admin/users')}
+        />
+      ) : null}
 
       <Button label="Sair da conta" variant="outline" onPress={() => void handleSignOut()} />
     </Container>

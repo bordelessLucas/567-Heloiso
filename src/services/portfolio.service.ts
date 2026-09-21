@@ -15,12 +15,14 @@ import {
   writeHoldings,
 } from '@/src/data/mocks/portfolio.store';
 import { MOCK_FUNDS } from '@/src/data/mocks/funds.mock';
-import { FUND_SEGMENT_LABELS } from '@/src/domain/fund';
+import { FUND_SEGMENT_LABELS, type FundSegment } from '@/src/domain/fund';
 import { getFundByTicker } from '@/src/services/funds.service';
 import { todayKey } from '@/src/utils/format';
 
 export interface PortfolioPositionView extends PortfolioHolding {
   name: string;
+  segment: FundSegment;
+  segmentLabel: string;
   currentPrice: number | null;
   changePercent: number | null;
   marketValue: number;
@@ -28,9 +30,19 @@ export interface PortfolioPositionView extends PortfolioHolding {
   pnlPercent: number;
 }
 
+export interface PortfolioSegmentSlice {
+  segment: FundSegment;
+  segmentLabel: string;
+  marketValue: number;
+  weight: number;
+  holdingsCount: number;
+  tickers: string[];
+}
+
 export interface PortfolioDashboard {
   summary: PortfolioSummary;
   positions: PortfolioPositionView[];
+  segmentSlices: PortfolioSegmentSlice[];
   totalMarketValue: number;
   totalPnlAmount: number;
   totalPnlPercent: number;
@@ -62,16 +74,56 @@ async function enrichHolding(holding: PortfolioHolding): Promise<PortfolioPositi
   const pnlAmount = marketValue - holding.investedAmount;
   const pnlPercent =
     holding.investedAmount > 0 ? (pnlAmount / holding.investedAmount) * 100 : 0;
+  const segment = marketFund?.segment ?? fund?.segment ?? 'other';
 
   return {
     ...holding,
     name: marketFund?.name ?? fund?.name ?? holding.ticker,
+    segment,
+    segmentLabel: FUND_SEGMENT_LABELS[segment],
     currentPrice,
     changePercent: marketFund?.changePercent ?? fund?.changePercent ?? null,
     marketValue,
     pnlAmount,
     pnlPercent,
   };
+}
+
+export function buildSegmentSlices(
+  positions: PortfolioPositionView[],
+): PortfolioSegmentSlice[] {
+  const total = positions.reduce((acc, item) => acc + item.marketValue, 0);
+  if (total <= 0) return [];
+
+  const map = new Map<
+    FundSegment,
+    { marketValue: number; tickers: string[]; holdingsCount: number }
+  >();
+
+  positions.forEach((position) => {
+    const current = map.get(position.segment) ?? {
+      marketValue: 0,
+      tickers: [],
+      holdingsCount: 0,
+    };
+    current.marketValue += position.marketValue;
+    current.holdingsCount += 1;
+    if (!current.tickers.includes(position.ticker)) {
+      current.tickers.push(position.ticker);
+    }
+    map.set(position.segment, current);
+  });
+
+  return [...map.entries()]
+    .map(([segment, data]) => ({
+      segment,
+      segmentLabel: FUND_SEGMENT_LABELS[segment],
+      marketValue: data.marketValue,
+      weight: data.marketValue / total,
+      holdingsCount: data.holdingsCount,
+      tickers: data.tickers,
+    }))
+    .sort((a, b) => b.marketValue - a.marketValue);
 }
 
 export function sortPositions(
@@ -213,6 +265,7 @@ export async function getPortfolioDashboard(
   return {
     summary,
     positions,
+    segmentSlices: buildSegmentSlices(positions),
     totalMarketValue,
     totalPnlAmount,
     totalPnlPercent,
@@ -225,7 +278,7 @@ export async function listPortfolioTrades(
   email?: string | null,
   options?: { days?: HistoryPeriodDays; ticker?: string },
 ): Promise<PortfolioTrade[]> {
-  const trades = readTrades(userId, email);
+  const trades = await readTrades(userId, email);
   return filterTradesByPeriod(trades, options?.days ?? 30, options?.ticker);
 }
 
@@ -261,23 +314,20 @@ export async function getHoldingDetail(
   email?: string | null,
   options?: { chartDays?: HistoryPeriodDays; historyDays?: HistoryPeriodDays },
 ): Promise<HoldingDetailView | null> {
-  const holdings = readHoldings(userId, email);
+  const holdings = await readHoldings(userId, email);
   const holding = holdings.find((item) => item.ticker.toUpperCase() === ticker.toUpperCase());
   if (!holding) return null;
 
   const position = await enrichHolding(holding);
   const price = position.currentPrice ?? position.averagePrice;
   const chartDays = options?.chartDays ?? 30;
+  const trades = await readTrades(userId, email);
 
   return {
     position,
     priceSeries: buildPriceSeries(position.ticker, chartDays, price),
     suggestions: listSimilarSuggestions(position.ticker),
-    trades: filterTradesByPeriod(
-      readTrades(userId, email),
-      options?.historyDays ?? 90,
-      position.ticker,
-    ),
+    trades: filterTradesByPeriod(trades, options?.historyDays ?? 90, position.ticker),
   };
 }
 
@@ -304,7 +354,7 @@ export async function executeTrade(input: ExecuteTradeInput): Promise<PortfolioP
   }
 
   const price = input.price ?? currentPrice;
-  const holdings = readHoldings(input.userId, input.email);
+  const holdings = await readHoldings(input.userId, input.email);
   const index = holdings.findIndex(
     (item) => item.ticker.toUpperCase() === input.ticker.toUpperCase(),
   );
@@ -363,7 +413,7 @@ export async function executeTrade(input: ExecuteTradeInput): Promise<PortfolioP
     }
   }
 
-  writeHoldings(input.userId, holdings);
+  await writeHoldings(input.userId, holdings);
 
   const trade: PortfolioTrade = {
     id: `trade_${Date.now()}`,
@@ -376,7 +426,7 @@ export async function executeTrade(input: ExecuteTradeInput): Promise<PortfolioP
     total: qty * price,
     executedAt: new Date().toISOString(),
   };
-  appendTrade(input.userId, trade);
+  await appendTrade(input.userId, trade);
 
   if (holding.quantity === 0) {
     return enrichHolding({ ...holding, quantity: 0, investedAmount: 0 });
@@ -391,7 +441,9 @@ export async function moveHoldingOrder(
   ticker: string,
   direction: 'up' | 'down',
 ): Promise<void> {
-  const holdings = readHoldings(userId, email).sort((a, b) => a.sortIndex - b.sortIndex);
+  const holdings = (await readHoldings(userId, email)).sort(
+    (a, b) => a.sortIndex - b.sortIndex,
+  );
   const index = holdings.findIndex((item) => item.ticker === ticker);
   if (index < 0) return;
 
@@ -404,5 +456,5 @@ export async function moveHoldingOrder(
 
   holdings[index] = { ...current, sortIndex: swap.sortIndex };
   holdings[target] = { ...swap, sortIndex: current.sortIndex };
-  writeHoldings(userId, holdings);
+  await writeHoldings(userId, holdings);
 }

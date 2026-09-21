@@ -7,7 +7,7 @@ import {
   ScreenHeader,
   Typography,
 } from '@/src/components';
-import { AllocationRing } from '@/src/components/AllocationRing';
+import { AllocationRing, type AllocationGroupBy } from '@/src/components/AllocationRing';
 import { HoldingPositionCard } from '@/src/components/HoldingPositionCard';
 import { PeriodFilterChips } from '@/src/components/PeriodFilterChips';
 import { PortfolioSortChips } from '@/src/components/PortfolioSortChips';
@@ -25,6 +25,7 @@ export function PortfolioScreen() {
   const [sort, setSort] = useState<PortfolioSortKey>('default');
   const [chartDays, setChartDays] = useState<HistoryPeriodDays>(30);
   const [historyDays, setHistoryDays] = useState<HistoryPeriodDays>(30);
+  const [groupBy, setGroupBy] = useState<AllocationGroupBy>('segment');
   const { dashboard, trades, loading, reorder } = usePortfolio({
     sort,
     chartDays,
@@ -74,7 +75,64 @@ export function PortfolioScreen() {
         subtitle="Toque em um ativo para analisar, comprar ou vender cotas."
       />
 
-      <AllocationRing positions={dashboard.positions} variant="compact" />
+      <View style={styles.groupToggle}>
+        <Pressable
+          onPress={() => setGroupBy('segment')}
+          style={[styles.groupChip, groupBy === 'segment' && styles.groupChipActive]}
+        >
+          <Typography variant="label" color={colors.black}>
+            Por segmento
+          </Typography>
+        </Pressable>
+        <Pressable
+          onPress={() => setGroupBy('ticker')}
+          style={[styles.groupChip, groupBy === 'ticker' && styles.groupChipActive]}
+        >
+          <Typography variant="label" color={colors.black}>
+            Por ativo
+          </Typography>
+        </Pressable>
+      </View>
+
+      <AllocationRing
+        positions={dashboard.positions}
+        variant="compact"
+        groupBy={groupBy}
+        title={groupBy === 'segment' ? 'Composição por segmento' : 'Composição por ativo'}
+      />
+
+      {groupBy === 'segment' && dashboard.segmentSlices.length > 0 ? (
+        <View style={styles.segmentCard}>
+          <Typography variant="h3">Peso por tipo de FII</Typography>
+          <Typography variant="caption" color={colors.textMuted}>
+            Veja quanto cada segmento representa da carteira. Percentuais-alvo de
+            diversificação ficam nas trilhas do Aprender — aqui só a sua posição real.
+          </Typography>
+          {dashboard.segmentSlices.map((slice) => {
+            const concentrated = slice.weight >= 0.5;
+            return (
+              <View key={slice.segment} style={styles.segmentRow}>
+                <View style={styles.segmentText}>
+                  <Typography variant="bodyStrong">{slice.segmentLabel}</Typography>
+                  <Typography variant="caption" color={colors.textMuted}>
+                    {slice.holdingsCount} ativo{slice.holdingsCount === 1 ? '' : 's'} ·{' '}
+                    {slice.tickers.join(', ')}
+                    {concentrated ? ' · concentração elevada neste tipo' : ''}
+                  </Typography>
+                </View>
+                <View style={styles.segmentValues}>
+                  <Typography variant="bodyStrong">
+                    {formatPercent(slice.weight * 100, 0)}
+                  </Typography>
+                  <Typography variant="caption" color={colors.textMuted}>
+                    {formatBrl(slice.marketValue)}
+                  </Typography>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      ) : null}
 
       <View style={styles.summary}>
         <Typography variant="caption" color={colors.textMuted}>
@@ -167,6 +225,43 @@ function createStyles(colors: AppColors) { return StyleSheet.create({
     borderRadius: radii.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+  },
+  groupToggle: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  groupChip: {
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: radii.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    ...shadows.card,
+  },
+  groupChipActive: {
+    backgroundColor: colors.primary,
+  },
+  segmentCard: {
+    backgroundColor: colors.surfaceWarm,
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    gap: spacing.sm,
+    ...shadows.card,
+  },
+  segmentRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    backgroundColor: colors.surfaceElevated,
+    borderRadius: radii.md,
+    padding: spacing.md,
+  },
+  segmentText: {
+    flex: 1,
+    gap: 2,
+  },
+  segmentValues: {
+    alignItems: 'flex-end',
+    gap: 2,
   },
   summary: {
     backgroundColor: colors.surfaceWarm,
