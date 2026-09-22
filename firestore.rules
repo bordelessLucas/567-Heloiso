@@ -64,6 +64,26 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /marketMeta/{docId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /marketFunds/{ticker} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /marketQuotes/{ticker} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /marketDividends/{ticker}/events/{eventId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
     match /portfolios/{userId}/{document=**} {
       allow read: if isSelf(userId) || isAdminOrReadonly();
       allow write: if isSelf(userId);
