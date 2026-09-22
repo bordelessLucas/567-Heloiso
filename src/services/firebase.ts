@@ -19,24 +19,40 @@ type FirebaseEnvKey =
   | 'EXPO_PUBLIC_FIREBASE_APP_ID'
   | 'EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID';
 
-function requireEnv(key: FirebaseEnvKey): string {
+const FIREBASE_ENV_FALLBACKS: Record<FirebaseEnvKey, string> = {
+  EXPO_PUBLIC_FIREBASE_API_KEY: 'missing-api-key',
+  EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: 'missing-firebase-config.firebaseapp.com',
+  EXPO_PUBLIC_FIREBASE_PROJECT_ID: 'missing-firebase-config',
+  EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: 'missing-firebase-config.appspot.com',
+  EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: '0',
+  EXPO_PUBLIC_FIREBASE_APP_ID: '1:0:web:missing-firebase-config',
+  EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: '',
+};
+
+const missingFirebaseEnvKeys = (
+  Object.keys(FIREBASE_ENV_FALLBACKS) as FirebaseEnvKey[]
+).filter((key) => !process.env[key]);
+
+export const isFirebaseConfigured = missingFirebaseEnvKeys.length === 0;
+
+function readEnv(key: FirebaseEnvKey): string {
   const value = process.env[key];
 
   if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
+    return FIREBASE_ENV_FALLBACKS[key];
   }
 
   return value;
 }
 
 const firebaseConfig = {
-  apiKey: requireEnv('EXPO_PUBLIC_FIREBASE_API_KEY'),
-  authDomain: requireEnv('EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN'),
-  projectId: requireEnv('EXPO_PUBLIC_FIREBASE_PROJECT_ID'),
-  storageBucket: requireEnv('EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET'),
-  messagingSenderId: requireEnv('EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'),
-  appId: requireEnv('EXPO_PUBLIC_FIREBASE_APP_ID'),
-  measurementId: requireEnv('EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID'),
+  apiKey: readEnv('EXPO_PUBLIC_FIREBASE_API_KEY'),
+  authDomain: readEnv('EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN'),
+  projectId: readEnv('EXPO_PUBLIC_FIREBASE_PROJECT_ID'),
+  storageBucket: readEnv('EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET'),
+  messagingSenderId: readEnv('EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID'),
+  appId: readEnv('EXPO_PUBLIC_FIREBASE_APP_ID'),
+  measurementId: readEnv('EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID'),
 };
 
 function createFirebaseApp(): FirebaseApp {

@@ -10,7 +10,7 @@ import {
 } from 'firebase/auth';
 
 import { MARKET_DEMO_EMAIL } from '@/src/data/mocks/demo.account';
-import { auth } from '@/src/services/firebase';
+import { auth, isFirebaseConfigured } from '@/src/services/firebase';
 
 export type AuthUser = User;
 
@@ -29,10 +29,19 @@ function getFirebaseErrorCode(error: unknown): string | null {
     : null;
 }
 
+function assertFirebaseConfigured(): void {
+  if (!isFirebaseConfigured) {
+    throw Object.assign(new Error('Firebase is not configured for this build.'), {
+      code: 'app/firebase-not-configured',
+    });
+  }
+}
+
 export async function signInWithEmail(
   email: string,
   password: string,
 ): Promise<UserCredential> {
+  assertFirebaseConfigured();
   const normalizedEmail = email.trim().toLowerCase();
 
   try {
@@ -55,10 +64,12 @@ export async function signUpWithEmail(
   email: string,
   password: string,
 ): Promise<UserCredential> {
+  assertFirebaseConfigured();
   return createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
 }
 
 export async function updateAuthDisplayName(displayName: string): Promise<void> {
+  assertFirebaseConfigured();
   const currentUser = auth.currentUser;
 
   if (!currentUser) {
@@ -69,10 +80,12 @@ export async function updateAuthDisplayName(displayName: string): Promise<void> 
 }
 
 export async function signOutCurrentUser(): Promise<void> {
+  assertFirebaseConfigured();
   await signOut(auth);
 }
 
 export async function sendPasswordReset(email: string): Promise<void> {
+  assertFirebaseConfigured();
   await sendPasswordResetEmail(auth, email.trim().toLowerCase());
 }
 

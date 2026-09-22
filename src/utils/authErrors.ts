@@ -7,6 +7,8 @@ export function getAuthErrorMessage(error: unknown): string {
   const code = String((error as { code: string }).code);
 
   switch (code) {
+    case 'app/firebase-not-configured':
+      return 'Firebase nao foi configurado nesta build. Verifique as variaveis do EAS.';
     case 'auth/email-already-in-use':
       return 'Este e-mail já está cadastrado.';
     case 'auth/invalid-email':
