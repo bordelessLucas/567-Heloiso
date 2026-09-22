@@ -24,14 +24,24 @@ export interface MarketFiiQuote {
   dividends12m: number | null;
   updatedAt: string | null;
   stale: boolean;
-  source: 'hgbrasil';
+  source: 'hgbrasil' | 'mock';
 }
 
 export interface MarketFiiDetails extends MarketFiiQuote {
   dividendsHistory: FundDividendEvent[];
 }
 
+export type MarketDataMode = 'mock' | 'functions' | 'direct-hg' | 'auto';
+
+export interface MarketDataHealth {
+  mode: MarketDataMode;
+  live: boolean;
+  reason: string | null;
+  updatedAt: string;
+}
+
 export interface MarketDataProvider {
+  getHealth?: () => Promise<MarketDataHealth>;
   getFiiQuote: (ticker: string) => Promise<MarketFiiQuote | null>;
   getFiiDetails: (ticker: string) => Promise<MarketFiiDetails | null>;
   getFiiDividends: (ticker: string) => Promise<FundDividendEvent[]>;

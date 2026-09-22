@@ -2,7 +2,7 @@ import type { FundProfile, FundSegment, FundSummary } from '@/src/domain/fund';
 import type { RankingBoard, RankingMetric } from '@/src/domain/ranking';
 import { toTesouroComparisonView } from '@/src/domain/fundsTools';
 import { MOCK_FUNDS, toFundSummary } from '@/src/data/mocks/funds.mock';
-import { hgBrasilProvider, type MarketFiiQuote } from '@/src/services/market-data';
+import { marketDataProvider, type MarketFiiQuote } from '@/src/services/market-data';
 import { formatCompactBrl, formatPercent, formatRatio } from '@/src/utils/format';
 
 function formatMetric(metric: RankingMetric, value: number | null): string {
@@ -76,7 +76,7 @@ function mergeProfileWithQuote(profile: FundProfile, quote?: MarketFiiQuote | nu
 }
 
 async function enrichSummariesWithMarketData(summaries: FundSummary[]): Promise<FundSummary[]> {
-  const quotes = await hgBrasilProvider.getFiiQuotes(summaries.map((fund) => fund.ticker));
+  const quotes = await marketDataProvider.getFiiQuotes(summaries.map((fund) => fund.ticker));
   return summaries.map((summary) => mergeSummaryWithQuote(summary, quotes.get(summary.ticker)));
 }
 
@@ -116,7 +116,7 @@ export async function getFundByTicker(ticker: string): Promise<FundProfile | nul
   );
   if (!found) return null;
 
-  const details = await hgBrasilProvider.getFiiDetails(found.ticker);
+  const details = await marketDataProvider.getFiiDetails(found.ticker);
   const merged = mergeProfileWithQuote(found, details);
   return {
     ...merged,
