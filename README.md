@@ -41,6 +41,12 @@ Prefixo obrigatório no mobile: `EXPO_PUBLIC_`.
 - `EXPO_PUBLIC_FIREBASE_APP_ID`
 - `EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID`
 
+## Market Data Staging
+
+The app defaults to mock market data so preview APKs can be tested without paid API keys.
+Production market data should be enabled through Firebase Functions, not by exposing the HG Brasil key in Expo public env.
+See `docs-ia/api_hg_functions_staging.md`.
+
 ## Scripts
 
 | Comando | Descrição |

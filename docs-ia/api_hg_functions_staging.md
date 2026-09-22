@@ -31,3 +31,14 @@ Clients may read these collections when signed in. Only Firebase Admin writes th
 
 The `syncMarketData` job is safe before the HG key exists. It writes an unavailable status only.
 After the key exists, extend the job to fetch the approved ticker universe and write quote snapshots.
+
+## APK for client testing today
+
+Use:
+
+```env
+EXPO_PUBLIC_MARKET_DATA_MODE=mock
+EXPO_PUBLIC_MARKET_FUNCTIONS_BASE_URL=
+```
+
+This keeps current screens reliable. Do not remove mock funds for this build.
