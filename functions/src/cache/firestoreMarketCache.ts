@@ -28,6 +28,10 @@ export async function readQuote(ticker: string): Promise<CachedMarketQuote | nul
   return snapshot.exists ? (snapshot.data() as CachedMarketQuote) : null;
 }
 
+export function isCachedQuoteFresh(quote: CachedMarketQuote): boolean {
+  return quote.staleAfter.toMillis() > Date.now();
+}
+
 export async function readFundDetails(ticker: string): Promise<CachedMarketFund | null> {
   const snapshot = await getFirestore()
     .collection('marketFunds')
