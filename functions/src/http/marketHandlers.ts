@@ -2,6 +2,8 @@ import type { Response } from 'express';
 import type { Request } from 'firebase-functions/v2/https';
 
 import { getRuntimeConfig } from '../config';
+import { fetchHgQuotes } from '../hg/client';
+import { normalizeHgQuote, readResultsArray } from '../hg/normalize';
 
 function sendJson(response: Response, status: number, body: unknown): void {
   response.set('Access-Control-Allow-Origin', '*');
@@ -31,6 +33,27 @@ export async function marketApiHandler(request: Request, response: Response): Pr
       reason: config.hasHgApiKey ? null : 'HG_BRASIL_API_KEY is not configured.',
       updatedAt: new Date().toISOString(),
     });
+    return;
+  }
+
+  if (path === '/market/quotes') {
+    const config = getRuntimeConfig();
+    if (!config.hgApiKey) {
+      sendJson(response, 503, { error: 'hg-key-not-configured', quotes: [] });
+      return;
+    }
+
+    const tickers = String(request.query.tickers ?? '')
+      .split(',')
+      .map((ticker) => ticker.trim().toUpperCase())
+      .filter(Boolean);
+
+    const json = await fetchHgQuotes(config.hgApiKey, tickers);
+    const quotes = readResultsArray(json)
+      .map((raw) => normalizeHgQuote(raw))
+      .filter((quote): quote is NonNullable<typeof quote> => quote !== null);
+
+    sendJson(response, 200, { quotes });
     return;
   }
 
